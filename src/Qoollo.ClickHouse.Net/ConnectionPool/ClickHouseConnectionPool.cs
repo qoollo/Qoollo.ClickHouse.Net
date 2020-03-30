@@ -1,7 +1,7 @@
 ﻿using ClickHouse.Ado;
 using Microsoft.Extensions.Logging;
+using Qoollo.ClickHouse.Net.Configuration;
 using System;
-using System.Collections.Generic;
 using System.Threading;
 
 namespace Qoollo.ClickHouse.Net.ConnectionPool
@@ -22,19 +22,18 @@ namespace Qoollo.ClickHouse.Net.ConnectionPool
         /// <summary>
         /// 
         /// </summary>
-        /// <param name="connectionStrings"></param>
-        /// <param name="maxElementCount"></param>
-        /// <param name="name"></param>
-        /// <param name="logger"></param>
-        public ClickHouseConnectionPool(List<string> connectionStrings, int maxElementCount, string name, ILogger logger) : base(maxElementCount, name)
+        /// <param name="config">Configuration</param>
+        /// <param name="name">Name of pool</param>
+        /// <param name="logger">logger instance</param>
+        public ClickHouseConnectionPool(IClickHouseConfiguration config, string name, ILogger logger) : base(config.ConnectionPoolMaxCount, name)
         {
-            if (connectionStrings == null)
-                throw new ArgumentNullException(nameof(connectionStrings));
+            if (config.ConnectionStrings == null)
+                throw new ArgumentNullException(nameof(config.ConnectionStrings));
 
-            if (connectionStrings.Count == 0)
-                throw new ArgumentException("connectionStrings is empty", nameof(connectionStrings));
+            if (config.ConnectionStrings.Count == 0)
+                throw new ArgumentException("connectionStrings is empty", nameof(config.ConnectionStrings));
 
-            _connectionStrings = connectionStrings.ToArray();
+            _connectionStrings = config.ConnectionStrings.ToArray();
             _currentConnectionString = _connectionStrings[0];
             _logger = logger;
             _locker = new object();
