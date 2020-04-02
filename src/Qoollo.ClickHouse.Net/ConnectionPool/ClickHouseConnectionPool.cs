@@ -23,9 +23,8 @@ namespace Qoollo.ClickHouse.Net.ConnectionPool
         /// 
         /// </summary>
         /// <param name="config">Configuration</param>
-        /// <param name="name">Name of pool</param>
         /// <param name="logger">logger instance</param>
-        public ClickHouseConnectionPool(IClickHouseConfiguration config, string name, ILogger logger) : base(config.ConnectionPoolMaxCount, name)
+        public ClickHouseConnectionPool(IClickHouseConfiguration config, ILogger logger) : base(config.ConnectionPoolMaxCount, config.ConnectionPoolName)
         {
             if (config.ConnectionStrings == null)
                 throw new ArgumentNullException(nameof(config.ConnectionStrings));

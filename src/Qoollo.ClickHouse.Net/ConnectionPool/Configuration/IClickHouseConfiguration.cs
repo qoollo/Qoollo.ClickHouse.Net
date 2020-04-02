@@ -16,5 +16,10 @@ namespace Qoollo.ClickHouse.Net.ConnectionPool.Configuration
         /// Maximum elements count for connection pool.
         /// </summary>
         int ConnectionPoolMaxCount { get; set; }
+
+        /// <summary>
+        /// Name for connection pool
+        /// </summary>
+        string ConnectionPoolName { get; set; }
     }
 }

@@ -17,12 +17,7 @@ namespace Qoollo.ClickHouse.Net
         {
             var config = configuration.Get<ClickHouseConfiguration>();
             services.AddTransient<IClickHouseConfiguration>(serviceProvider => config);
-
-            services.AddSingleton(serviceProvider => new ClickHouseConnectionPool(
-                config: config,
-                name: "ClickHouseConnectionPool",
-                logger: serviceProvider.GetRequiredService<ILogger>()));
-
+            services.AddSingleton<ClickHouseConnectionPool>();
             services.AddTransient<IClickHouseRepository, ClickHouseRepository>();
         }
 
@@ -35,12 +30,9 @@ namespace Qoollo.ClickHouse.Net
 
             var config = configuration.Get<ClickHouseAggregatingQueueProcessorConfiguration>();
             services.AddTransient<IClickHouseAggregatingQueueProcessorConfiguration>(serviceProvider => config);
-
-            services.AddSingleton<IClickHouseAggregatingQueueProcessor<T>>(serviceProvider => new ClickHouseAggregatingQueueProcessor<T>(
-                config: config,
-                repository: serviceProvider.GetRequiredService<IClickHouseRepository>(),
-                proc: proc,
-                logger: serviceProvider.GetRequiredService<ILogger>()));
+            
+            services.AddTransient<IProcHolder<T>>(serviceProvider => new ProcHolder<T>(proc));
+            services.AddSingleton<IClickHouseAggregatingQueueProcessor<T>, ClickHouseAggregatingQueueProcessor<T>>();
         }
     }
 }

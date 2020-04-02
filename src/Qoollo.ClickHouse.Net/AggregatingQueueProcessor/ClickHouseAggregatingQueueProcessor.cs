@@ -19,11 +19,11 @@ namespace Qoollo.ClickHouse.Net.AggregatingQueueProcessor
     public class ClickHouseAggregatingQueueProcessor<T> : IClickHouseAggregatingQueueProcessor<T>
     {
         private readonly DelegateQueueAsyncProcessor<List<T>> _delegateQueueAsyncProcessor;
-        private readonly Action<IClickHouseRepository, List<T>, ILogger> _proc;
+        private readonly IProcHolder<T> _procHolder;
         private readonly ConcurrentQueue<T> _elementQueue = new ConcurrentQueue<T>();
 
         private readonly IClickHouseRepository _repository;
-        private readonly ILogger _logger;
+        private readonly ILogger<ClickHouseAggregatingQueueProcessor<T>> _logger;
         private readonly object _lock = new object();
         
         private volatile int _totalProcessedEventsCount;
@@ -65,13 +65,13 @@ namespace Qoollo.ClickHouse.Net.AggregatingQueueProcessor
         public ClickHouseAggregatingQueueProcessor(
             IClickHouseAggregatingQueueProcessorConfiguration config,
             IClickHouseRepository repository, 
-            Action<IClickHouseRepository, List<T>, ILogger> proc, 
-            ILogger logger)
+            IProcHolder<T> procHolder,
+            ILogger<ClickHouseAggregatingQueueProcessor<T>> logger)
         {
             _logger = logger;
             MaxPackageSize = config.MaxPackageSize;
             _repository = repository;
-            _proc = proc;
+            _procHolder = procHolder;
             TimerPeriodMs = config.TimerPeriodMs;
 
             _delegateQueueAsyncProcessor = new DelegateQueueAsyncProcessor<List<T>>(
@@ -188,7 +188,7 @@ namespace Qoollo.ClickHouse.Net.AggregatingQueueProcessor
             {
                 if (package.Count > 0)
                 {
-                    _proc(_repository, package, _logger);
+                    _procHolder.Proc(_repository, package, _logger);
                     Interlocked.Add(ref _totalProcessedEventsCount, package.Count);
                 }
             }
