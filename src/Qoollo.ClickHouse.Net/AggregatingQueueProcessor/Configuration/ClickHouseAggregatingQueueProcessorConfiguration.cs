@@ -1,4 +1,4 @@
-﻿namespace Qoollo.ClickHouse.Net.AggregatingQueueProcessor
+﻿namespace Qoollo.ClickHouse.Net.AggregatingQueueProcessor.Configuration
 {
     /// <summary>
     /// Configuration for ClickHouseAggregatingQueueProcessor

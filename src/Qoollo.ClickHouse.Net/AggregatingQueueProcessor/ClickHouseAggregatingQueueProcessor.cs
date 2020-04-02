@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.Logging;
+using Qoollo.ClickHouse.Net.AggregatingQueueProcessor.Configuration;
 using Qoollo.ClickHouse.Net.Repository;
 using Qoollo.Turbo.Threading.QueueProcessing;
 using System;
@@ -62,7 +63,7 @@ namespace Qoollo.ClickHouse.Net.AggregatingQueueProcessor
         /// <param name="proc"> The action that the Worker-threads will perform with packages from the processing queue </param>
         /// <param name="logger">Logger</param>
         public ClickHouseAggregatingQueueProcessor(
-            ClickHouseAggregatingQueueProcessorConfiguration config,
+            IClickHouseAggregatingQueueProcessorConfiguration config,
             IClickHouseRepository repository, 
             Action<IClickHouseRepository, List<T>, ILogger> proc, 
             ILogger logger)
