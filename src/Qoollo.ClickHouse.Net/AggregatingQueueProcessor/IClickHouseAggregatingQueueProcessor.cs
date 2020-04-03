@@ -69,6 +69,11 @@ namespace Qoollo.ClickHouse.Net.AggregatingQueueProcessor
         int TotalPushedItemsCount { get; }
 
         /// <summary>
+        /// Total count of items, that was added by Add or AddPackage methods
+        /// </summary>
+        int TotalAddedItemsCount { get; }
+
+        /// <summary>
         /// Time in ms for package sending timer
         /// </summary>
         public int TimerPeriodMs { get; }
