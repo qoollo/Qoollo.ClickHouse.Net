@@ -1,6 +1,6 @@
 ﻿using ClickHouse.Ado;
 using Microsoft.Extensions.Logging;
-using Qoollo.ClickHouse.Net.Configuration;
+using Qoollo.ClickHouse.Net.ConnectionPool.Configuration;
 using System;
 using System.Threading;
 

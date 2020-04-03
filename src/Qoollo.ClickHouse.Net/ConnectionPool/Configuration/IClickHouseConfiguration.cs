@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace Qoollo.ClickHouse.Net.Configuration
+namespace Qoollo.ClickHouse.Net.ConnectionPool.Configuration
 {
     /// <summary>
     /// Configuration for ClickHouseConnectionPool
@@ -20,6 +20,6 @@ namespace Qoollo.ClickHouse.Net.Configuration
         /// <summary>
         /// Name for connection pool
         /// </summary>
-        public string ConnectionPoolName { get; set; }
+        string ConnectionPoolName { get; set; }
     }
 }
