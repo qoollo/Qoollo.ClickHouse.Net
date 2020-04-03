@@ -34,7 +34,7 @@ namespace Qoollo.ClickHouse.Net.AggregatingQueueProcessor
         /// <summary>
         /// Start processing
         /// </summary>
-        /// <exception cref="InvalidOperationException"> Instance state is not correct for this action  </exception>
+        /// <exception cref="InvalidOperationException"> Instance state is not correct for this action </exception>
         void Start();
 
         /// <summary>

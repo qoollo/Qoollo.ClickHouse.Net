@@ -162,12 +162,12 @@ namespace Qoollo.ClickHouse.Net.AggregatingQueueProcessor
                 throw new InvalidOperationException("AggregatingQueueProcessor is not strated");
 
             State = State.Stopping;
+            _timer.Enabled = false;
             lock (_lock)
             {
                 while (_elementQueue.Count > 0)
                     AddSinglePackage();
             }
-            _timer.Enabled = false;
             _delegateQueueAsyncProcessor.Stop(waitForStop: true, letFinishProcess: true, completeAdding: true);
             State = State.Stoped;
         }
