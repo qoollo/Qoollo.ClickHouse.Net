@@ -31,7 +31,6 @@ namespace Qoollo.ClickHouse.Net
 
             var config = configuration.Get<ClickHouseAggregatingQueueProcessorConfiguration>();
             services.AddTransient<IClickHouseAggregatingQueueProcessorConfiguration>(serviceProvider => config);
-            
             services.AddTransient<IProcHolder<T>>(serviceProvider => new ProcHolder<T>(proc));
             services.AddSingleton<IClickHouseAggregatingQueueProcessor<T>, ClickHouseAggregatingQueueProcessor<T>>();
             return services;
