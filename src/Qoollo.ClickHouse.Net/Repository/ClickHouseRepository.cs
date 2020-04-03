@@ -3,6 +3,7 @@ using Qoollo.ClickHouse.Net.ConnectionPool;
 using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Threading.Tasks;
 
 namespace Qoollo.ClickHouse.Net.Repository
 {
@@ -21,10 +22,20 @@ namespace Qoollo.ClickHouse.Net.Repository
             BulkInsert(queryText, bulk);
         }
 
+        public Task BulkInsertAsync<T>(string tableName, IEnumerable<string> columns, IEnumerable<T> bulk)
+        {
+            return Task.Run(() => BulkInsert(tableName, columns, bulk));
+        }
+
         public void BulkInsert(string tableName, IEnumerable<string> columns, IBulkInsertEnumerable bulk)
         {
             var queryText = $@"INSERT INTO {tableName}({string.Join(",", columns)}) VALUES @bulk";
             BulkInsert(queryText, bulk);
+        }
+
+        public Task BulkInsertAsync(string tableName, IEnumerable<string> columns, IBulkInsertEnumerable bulk)
+        {
+            return Task.Run(() => BulkInsert(tableName, columns, bulk));
         }
 
         public void BulkInsert<T>(string queryText, IEnumerable<T> bulk)
@@ -41,6 +52,11 @@ namespace Qoollo.ClickHouse.Net.Repository
                     cmd.ExecuteNonQuery();
                 }
             }
+        }
+
+        public Task BulkInsertAsync<T>(string queryText, IEnumerable<T> bulk)
+        {
+            return Task.Run(() => BulkInsert(queryText, bulk));
         }
 
         public void BulkInsert(string queryText, IBulkInsertEnumerable bulk)
@@ -60,6 +76,11 @@ namespace Qoollo.ClickHouse.Net.Repository
             }
         }
 
+        public Task BulkInsertAsync(string queryText, IBulkInsertEnumerable bulk)
+        {
+            return Task.Run(() => BulkInsert(queryText, bulk));
+        }
+
         public void ExecuteNonQuery(string queryText, IEnumerable<ClickHouseParameter> parameters = null)
         {
             using (var item = _clickHouseConnectionPool.Rent())
@@ -71,6 +92,11 @@ namespace Qoollo.ClickHouse.Net.Repository
                     cmd.ExecuteNonQuery();
                 }
             }
+        }
+        
+        public Task ExecuteNonQueryAsync(string queryText, IEnumerable<ClickHouseParameter> parameters = null)
+        {
+            return Task.Run(() => ExecuteNonQuery(queryText, parameters));
         }
 
         public IEnumerable<T> ExecuteQueryMapping<T>(string queryText, IEntityMapper<T> mapper, IEnumerable<ClickHouseParameter> parameters = null)
@@ -95,6 +121,11 @@ namespace Qoollo.ClickHouse.Net.Repository
             return result;
         }
 
+        public Task<IEnumerable<T>> ExecuteQueryMappingAsync<T>(string queryText, IEntityMapper<T> mapper, IEnumerable<ClickHouseParameter> parameters = null)
+        {
+            return Task.Run(() => ExecuteQueryMapping(queryText, mapper, parameters));
+        }
+
         public T ExecuteReader<T>(string queryText, Func<IDataReader, T> processor, IEnumerable<ClickHouseParameter> parameters = null)
         {
             using (var item = _clickHouseConnectionPool.Rent())
@@ -111,6 +142,11 @@ namespace Qoollo.ClickHouse.Net.Repository
             }
         }
 
+        public Task<T> ExecuteReaderAsync<T>(string queryText, Func<IDataReader, T> processor, IEnumerable<ClickHouseParameter> parameters = null)
+        {
+            return Task.Run(() => ExecuteReaderAsync(queryText, processor, parameters));
+        }
+
         public object ExecuteScalar(string queryText, IEnumerable<ClickHouseParameter> parameters = null)
         {
             using (var item = _clickHouseConnectionPool.Rent())
@@ -121,6 +157,11 @@ namespace Qoollo.ClickHouse.Net.Repository
                     return cmd.ExecuteScalar();
                 }
             }
+        }
+
+        public Task<object> ExecuteScalarAsync(string queryText, IEnumerable<ClickHouseParameter> parameters = null)
+        {
+            return Task.Run(() => ExecuteScalar(queryText, parameters));
         }
 
         private void AddParametersToCommand(ClickHouseCommand cmd, IEnumerable<ClickHouseParameter> parameters)

@@ -13,15 +13,16 @@ namespace Qoollo.ClickHouse.Net
 {
     public static class ServiceCollectionExtensions
     {
-        public static void AddClickHouseRepository(this IServiceCollection services, IConfigurationSection configuration)
+        public static IServiceCollection AddClickHouseRepository(this IServiceCollection services, IConfigurationSection configuration)
         {
             var config = configuration.Get<ClickHouseConfiguration>();
             services.AddTransient<IClickHouseConfiguration>(serviceProvider => config);
             services.AddSingleton<ClickHouseConnectionPool>();
             services.AddTransient<IClickHouseRepository, ClickHouseRepository>();
+            return services;
         }
 
-        public static void AddClickHouseRepositoryAndQueue<T>(
+        public static IServiceCollection AddClickHouseRepositoryAndQueue<T>(
             this IServiceCollection services, 
             IConfigurationSection configuration, 
             Action<IClickHouseRepository, List<T>, ILogger> proc)
@@ -33,6 +34,7 @@ namespace Qoollo.ClickHouse.Net
             
             services.AddTransient<IProcHolder<T>>(serviceProvider => new ProcHolder<T>(proc));
             services.AddSingleton<IClickHouseAggregatingQueueProcessor<T>, ClickHouseAggregatingQueueProcessor<T>>();
+            return services;
         }
     }
 }
