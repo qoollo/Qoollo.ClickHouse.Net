@@ -14,7 +14,7 @@ namespace Qoollo.ClickHouse.Net.ConnectionPool
     /// <exception cref="ClickHouseConnectionException"></exception>
     public class ClickHouseConnectionPool : Turbo.ObjectPools.DynamicPoolManager<ClickHouseConnection>
     {
-        private readonly ILogger _logger;
+        private readonly ILogger<ClickHouseConnectionPool> _logger;
         private readonly string[] _connectionStrings;
         private volatile string _currentConnectionString;
         private readonly object _locker;
@@ -23,9 +23,8 @@ namespace Qoollo.ClickHouse.Net.ConnectionPool
         /// 
         /// </summary>
         /// <param name="config">Configuration</param>
-        /// <param name="name">Name of pool</param>
         /// <param name="logger">logger instance</param>
-        public ClickHouseConnectionPool(IClickHouseConfiguration config, string name, ILogger logger) : base(config.ConnectionPoolMaxCount, name)
+        public ClickHouseConnectionPool(IClickHouseConfiguration config, ILogger<ClickHouseConnectionPool> logger) : base(config.ConnectionPoolMaxCount, config.ConnectionPoolName)
         {
             if (config.ConnectionStrings == null)
                 throw new ArgumentNullException(nameof(config.ConnectionStrings));
@@ -53,7 +52,7 @@ namespace Qoollo.ClickHouse.Net.ConnectionPool
                     return true;
                 }
 
-                _logger.LogInformation("Connection pool: {0}: Db instance is Unavailable, connection string: {1}", Name, connectionString);
+                _logger.LogWarning("Connection pool: {0}: Db instance is Unavailable, connection string: {1}", Name, connectionString);
 
                 Interlocked.CompareExchange(ref _currentConnectionString, null, connectionString);
                 connectionString = _currentConnectionString;
@@ -80,7 +79,6 @@ namespace Qoollo.ClickHouse.Net.ConnectionPool
             {
                 _logger.LogWarning(ex, "Error during connection close with ClickHouse in ClickHouseConnectionPool. Connection string: {0}", elem.ConnectionString);
             }
-
         }
 
         protected override bool IsValidElement(ClickHouseConnection elem)

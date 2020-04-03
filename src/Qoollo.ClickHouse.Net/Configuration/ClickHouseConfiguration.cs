@@ -7,5 +7,7 @@ namespace Qoollo.ClickHouse.Net.Configuration
         public List<string> ConnectionStrings { get; set; }
 
         public int ConnectionPoolMaxCount { get; set; }
+
+        public string ConnectionPoolName { get; set; }
     }
 }

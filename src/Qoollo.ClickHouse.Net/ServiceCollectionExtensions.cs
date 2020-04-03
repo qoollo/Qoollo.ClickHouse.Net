@@ -9,17 +9,13 @@ namespace Qoollo.ClickHouse.Net
 {
     public static class ServiceCollectionExtensions
     {
-        public static void AddClickHouseRepository(this IServiceCollection services, IConfigurationSection configuration)
+        public static IServiceCollection AddClickHouseRepository(this IServiceCollection services, IConfigurationSection configuration)
         {
             var config = configuration.Get<ClickHouseConfiguration>();
             services.AddTransient<IClickHouseConfiguration>(serviceProvider => config);
-
-            services.AddSingleton(serviceProvider => new ClickHouseConnectionPool(
-                config: config,
-                name: "ClickHouseConnectionPool",
-                logger: serviceProvider.GetRequiredService<ILogger>()));
-
+            services.AddSingleton<ClickHouseConnectionPool>();
             services.AddTransient<IClickHouseRepository, ClickHouseRepository>();
+            return services;
         }
     }
 }
