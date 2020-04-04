@@ -36,8 +36,9 @@ namespace WebApiExample
         {
             services.AddLogging(s => s.AddSerilog());
 
-            // Add repository and QueueProcessor
-            services.AddClickHouseRepositoryAndQueueProcessor(Configuration.GetSection("ClickHouse"), writeAction);
+            // Add QueueProcessor
+            services.AddClickHouseRepository(Configuration.GetSection("ClickHouseConnectionPoolConfiguration"));
+            services.AddClickHouseAggregatingQueueProcessor(Configuration.GetSection("ClickHouseAggregatingQueueProcessorConfiguration"), writeAction);
 
             services.AddControllers();
 
