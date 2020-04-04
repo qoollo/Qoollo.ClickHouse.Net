@@ -1,5 +1,5 @@
 {
-  "IClickHouseConnectionPoolConfiguration": {
+  "ClickHouseConnectionPoolConfiguration": {
     "ConnectionStrings": [
       "Host=192.168.159.131;Port=9011;Database=default;User=default;Password="
     ],

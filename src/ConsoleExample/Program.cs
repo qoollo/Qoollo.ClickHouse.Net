@@ -23,7 +23,7 @@ namespace ConsoleExample
 
             var serviceProvider = new ServiceCollection()
                 .AddLogging(configure => configure.AddSerilog())
-                .AddClickHouseRepository(config.GetSection("ClickHouseConfiguration"))
+                .AddClickHouseRepository(config.GetSection("ClickHouseConnectionPoolConfiguration"))
                 .AddTransient<IWriter, Writer>()
                 .AddTransient<IReader, Reader>()
                 .BuildServiceProvider();
