@@ -15,22 +15,20 @@ namespace Qoollo.ClickHouse.Net
     {
         public static IServiceCollection AddClickHouseRepository(this IServiceCollection services, IConfigurationSection configuration)
         {
-            var config = configuration.Get<ClickHouseConfiguration>();
-            services.AddTransient<IClickHouseConfiguration>(serviceProvider => config);
+            var config = configuration.Get<ClickHouseConnectionPoolConfiguration>();
+            services.AddTransient<IClickHouseConnectionPoolConfiguration>(serviceProvider => config);
             services.AddSingleton<ClickHouseConnectionPool>();
             services.AddTransient<IClickHouseRepository, ClickHouseRepository>();
             return services;
         }
 
-        public static IServiceCollection AddClickHouseRepositoryAndQueue<T>(
+        public static IServiceCollection AddClickHouseAggregatingQueueProcessor<T>(
             this IServiceCollection services, 
             IConfigurationSection configuration, 
             Action<IClickHouseRepository, List<T>, ILogger> proc)
         {
-            services.AddClickHouseRepository(configuration.GetSection(nameof(ClickHouseConfiguration)));
-
-            var config = configuration.Get<ClickHouseAggregatingQueueProcessorConfiguration>();
-            services.AddTransient<IClickHouseAggregatingQueueProcessorConfiguration>(serviceProvider => config);
+            var processorConfig = configuration.Get<ClickHouseAggregatingQueueProcessorConfiguration>();
+            services.AddTransient<IClickHouseAggregatingQueueProcessorConfiguration>(serviceProvider => processorConfig);
             services.AddTransient<IProcHolder<T>>(serviceProvider => new ProcHolder<T>(proc));
             services.AddSingleton<IClickHouseAggregatingQueueProcessor<T>, ClickHouseAggregatingQueueProcessor<T>>();
             return services;

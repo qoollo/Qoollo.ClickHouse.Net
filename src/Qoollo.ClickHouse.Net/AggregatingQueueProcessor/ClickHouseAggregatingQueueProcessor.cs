@@ -19,16 +19,18 @@ namespace Qoollo.ClickHouse.Net.AggregatingQueueProcessor
     public class ClickHouseAggregatingQueueProcessor<T> : IClickHouseAggregatingQueueProcessor<T>
     {
         private readonly DelegateQueueAsyncProcessor<List<T>> _delegateQueueAsyncProcessor;
-        private readonly IProcHolder<T> _procHolder;
+        private readonly System.Timers.Timer _timer;
         private readonly ConcurrentQueue<T> _elementQueue = new ConcurrentQueue<T>();
 
+        private readonly IProcHolder<T> _procHolder;
         private readonly IClickHouseRepository _repository;
         private readonly ILogger<ClickHouseAggregatingQueueProcessor<T>> _logger;
+
         private readonly object _lock = new object();
         
         private volatile int _totalProcessedEventsCount;
         private volatile int _totalPushedEventsCount;
-        private System.Timers.Timer _timer;
+        private volatile int _totalAddedEventsCount;
 
         /// <summary>
         /// Max size of the package that can be added to the queue 
@@ -54,6 +56,10 @@ namespace Qoollo.ClickHouse.Net.AggregatingQueueProcessor
         /// Total count of items, that was added to the processing queue
         /// </summary>
         public int TotalPushedItemsCount => _totalPushedEventsCount;
+        /// <summary>
+        /// Total count of items, that was added by Add or AddPackage methods
+        /// </summary>
+        public int TotalAddedItemsCount => _totalAddedEventsCount;
 
         /// <summary>
         /// 
@@ -80,7 +86,11 @@ namespace Qoollo.ClickHouse.Net.AggregatingQueueProcessor
                 name: "AggregatingQueueProcessor",
                 processing: ThreadProc);
 
-            InitTimer(TimerPeriodMs);
+            _timer = new System.Timers.Timer(TimerPeriodMs);
+
+            _timer.Elapsed += OnTimedEvent;
+            _timer.AutoReset = true;
+            _timer.Enabled = false;
 
             State = State.Created;
         }
@@ -96,6 +106,7 @@ namespace Qoollo.ClickHouse.Net.AggregatingQueueProcessor
                 throw new InvalidOperationException("AggregatingQueueProcessor is not statred");
 
             _elementQueue.Enqueue(item);
+            Interlocked.Add(ref _totalAddedEventsCount, 1);
 
             if (_elementQueue.Count >= MaxPackageSize)
             {
@@ -122,6 +133,9 @@ namespace Qoollo.ClickHouse.Net.AggregatingQueueProcessor
                 throw new ArgumentOutOfRangeException(nameof(package), "package size is upper then queue MaxPackageSize");
 
             _delegateQueueAsyncProcessor.Add(package);
+            _logger.LogInformation("Package with {0} elements was added to processong queue", package.Count);
+            Interlocked.Add(ref _totalAddedEventsCount, package.Count);
+            Interlocked.Add(ref _totalPushedEventsCount, package.Count);
         }
 
         /// <summary>
@@ -179,6 +193,7 @@ namespace Qoollo.ClickHouse.Net.AggregatingQueueProcessor
                 package.Add(elem);
 
             _delegateQueueAsyncProcessor.Add(package);
+            _logger.LogInformation("Package with {0} elements was added to processong queue", package.Count);
             Interlocked.Add(ref _totalPushedEventsCount, package.Count);
         }
 
@@ -199,24 +214,10 @@ namespace Qoollo.ClickHouse.Net.AggregatingQueueProcessor
             }
         }
 
-        #region Timer
-        private void InitTimer(int timerPeriodMs)
-        {
-            if (State != State.Created)
-                throw new InvalidOperationException("AggregatingQueueProcessor is already started");
-
-            _timer = new System.Timers.Timer(timerPeriodMs);
-
-            _timer.Elapsed += OnTimedEvent;
-            _timer.AutoReset = true;
-            _timer.Enabled = false;
-        }
-
         private void OnTimedEvent(object source, ElapsedEventArgs e)
         {
             AddSinglePackage();
         }
-        #endregion
 
         #region IDisposable Support
         protected virtual void Dispose(bool disposing)
