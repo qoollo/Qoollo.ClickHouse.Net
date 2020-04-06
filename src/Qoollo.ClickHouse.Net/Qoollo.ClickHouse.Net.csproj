@@ -2,6 +2,27 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.1</TargetFramework>
+    <Company>Qoollo</Company>
+    <Authors>Svyatoslav Sychev</Authors>
+    <Description>
+      .NET library for ClickHouse with useful classes such as aggregating queue for bulk inserts.
+      The ClickHouse-Net driver is used (native ClickHouse protocol with data compression).
+    </Description>
+    <PackageTags>ClickHouse;database;class-library;netstandard;netcore;aggregation;bulk-operation</PackageTags>
+    <Copyright></Copyright>
+    <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
+    <AssemblyVersion>1.0.0.0</AssemblyVersion>
+    <Version>1.0.0</Version>
+    <FileVersion>1.0.0.0</FileVersion>
+    <AssemblyName>Qoollo.ClickHouse.Net</AssemblyName>
+    <RootNamespace>Qoollo.ClickHouse.Net</RootNamespace>
+    <PackageId>Qoollo.ClickHouse.Net</PackageId>
+    <PackageProjectUrl>https://github.com/qoollo/Qoollo.ClickHouse.Net</PackageProjectUrl>
+    <PackageLicenseUrl>https://github.com/qoollo/Qoollo.ClickHouse.Net/LICENSE</PackageLicenseUrl>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <DocumentationFile>Qoollo.ClickHouse.Net.xml</DocumentationFile>
   </PropertyGroup>
 
   <ItemGroup>
