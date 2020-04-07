@@ -66,7 +66,7 @@ namespace Qoollo.ClickHouse.Net.AggregatingQueueProcessor
         /// </summary>
         /// <param name="config"> Configuration for instance </param>
         /// <param name="repository"> IClickHouseRepository instance </param>
-        /// <param name="proc"> The action that the Worker-threads will perform with packages from the processing queue </param>
+        /// <param name="procHolder"> Holder for action that the worker-threads will perform with packages from the processing queue </param>
         /// <param name="logger">Logger</param>
         public ClickHouseAggregatingQueueProcessor(
             IClickHouseAggregatingQueueProcessorConfiguration config,
@@ -220,6 +220,10 @@ namespace Qoollo.ClickHouse.Net.AggregatingQueueProcessor
         }
 
         #region IDisposable Support
+        /// <summary>
+        /// Dispose pattern
+        /// </summary>
+        /// <param name="disposing"></param>
         protected virtual void Dispose(bool disposing)
         {
             if (State == State.Disposed)
@@ -237,6 +241,9 @@ namespace Qoollo.ClickHouse.Net.AggregatingQueueProcessor
             State = State.Disposed;
         }
 
+        /// <summary>
+        /// Dispose processor
+        /// </summary>
         public void Dispose()
         {
             Dispose(true);

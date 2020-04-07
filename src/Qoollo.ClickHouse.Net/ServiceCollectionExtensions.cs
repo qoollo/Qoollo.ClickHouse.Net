@@ -11,8 +11,16 @@ using System.Collections.Generic;
 
 namespace Qoollo.ClickHouse.Net
 {
+    /// <summary>
+    /// Extensions to add Qoollo.ClickHouse.Net classes to DI.
+    /// </summary>
     public static class ServiceCollectionExtensions
     {
+        /// <summary>
+        /// Extension to add ClickHouseConnectionPool and IClickHouseRepository to services.
+        /// </summary>
+        /// <param name="services"></param>
+        /// <param name="configuration">Configuration section that contain connection pool configuration (ClickHouseConnectionPoolConfiguration)</param>
         public static IServiceCollection AddClickHouseRepository(this IServiceCollection services, IConfigurationSection configuration)
         {
             var config = configuration.Get<ClickHouseConnectionPoolConfiguration>();
@@ -22,6 +30,14 @@ namespace Qoollo.ClickHouse.Net
             return services;
         }
 
+        /// <summary>
+        /// Extension to add IClickHouseAggregatingQueueProcessor to services. Requires IClickHouseRepository in DI.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="services"></param>
+        /// <param name="configuration">Configuration section that contain queue processor configuration (ClickHouseAggregatingQueueProcessorConfiguration)</param>
+        /// <param name="proc"></param>
+        /// <returns></returns>
         public static IServiceCollection AddClickHouseAggregatingQueueProcessor<T>(
             this IServiceCollection services, 
             IConfigurationSection configuration, 

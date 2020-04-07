@@ -38,6 +38,13 @@ namespace Qoollo.ClickHouse.Net.ConnectionPool
             _locker = new object();
         }
 
+        /// <summary>
+        /// Try to create ClickHouseConnection fast, if fail - try full check, if fail - throw an exception
+        /// </summary>
+        /// <param name="elem"></param>
+        /// <param name="timeout"></param>
+        /// <param name="token"></param>
+        /// <returns></returns>
         protected override bool CreateElement(out ClickHouseConnection elem, int timeout, CancellationToken token)
         {
             var connectionString = _currentConnectionString;
@@ -63,6 +70,10 @@ namespace Qoollo.ClickHouse.Net.ConnectionPool
             return elem != null;
         }
 
+        /// <summary>
+        /// Destroy connection
+        /// </summary>
+        /// <param name="elem"></param>
         protected override void DestroyElement(ClickHouseConnection elem)
         {
             if (elem == null)
@@ -81,6 +92,11 @@ namespace Qoollo.ClickHouse.Net.ConnectionPool
             }
         }
 
+        /// <summary>
+        /// Check is connection valid
+        /// </summary>
+        /// <param name="elem">Connection</param>
+        /// <returns></returns>
         protected override bool IsValidElement(ClickHouseConnection elem)
         {
             if (_currentConnectionString == null)
