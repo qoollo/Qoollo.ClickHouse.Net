@@ -4,25 +4,24 @@
     <TargetFramework>netstandard2.1</TargetFramework>
     <Company>Qoollo</Company>
     <Authors>Svyatoslav Sychev</Authors>
-    <Description>
-      .NET library for ClickHouse with useful classes such as aggregating queue for bulk inserts.
-      The ClickHouse-Net driver is used (native ClickHouse protocol with data compression).
-    </Description>
+    <Description>.NET library for ClickHouse with useful classes such as aggregating queue for bulk inserts. The ClickHouse-Net driver is used (native ClickHouse protocol with data compression).</Description>
     <PackageTags>ClickHouse;database;class-library;netstandard;netcore;aggregation;bulk-operation</PackageTags>
     <Copyright></Copyright>
     <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
     <AssemblyVersion>1.0.0.0</AssemblyVersion>
-    <Version>1.0.0</Version>
+    <Version>1.0.0-preview</Version>
     <FileVersion>1.0.0.0</FileVersion>
     <AssemblyName>Qoollo.ClickHouse.Net</AssemblyName>
     <RootNamespace>Qoollo.ClickHouse.Net</RootNamespace>
     <PackageId>Qoollo.ClickHouse.Net</PackageId>
     <PackageProjectUrl>https://github.com/qoollo/Qoollo.ClickHouse.Net</PackageProjectUrl>
-    <PackageLicenseUrl>https://github.com/qoollo/Qoollo.ClickHouse.Net/LICENSE</PackageLicenseUrl>
+    <PackageLicenseUrl></PackageLicenseUrl>
   </PropertyGroup>
 
   <PropertyGroup>
     <DocumentationFile>Qoollo.ClickHouse.Net.xml</DocumentationFile>
+    <PackageLicenseFile>LICENSE</PackageLicenseFile>
+    <RepositoryUrl>https://github.com/qoollo/Qoollo.ClickHouse.Net</RepositoryUrl>
   </PropertyGroup>
 
   <ItemGroup>
@@ -32,6 +31,13 @@
     <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="3.1.3" />
     <PackageReference Include="Microsoft.Extensions.Logging" Version="3.1.3" />
     <PackageReference Include="Qoollo.Turbo" Version="3.0.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="..\..\LICENSE">
+      <Pack>True</Pack>
+      <PackagePath></PackagePath>
+    </None>
   </ItemGroup>
   
 </Project>
