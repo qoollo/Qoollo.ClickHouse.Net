@@ -19,14 +19,14 @@ namespace Qoollo.ClickHouse.Net.AggregatingQueueProcessor
     public class ClickHouseAggregatingQueueProcessor<T> : IClickHouseAggregatingQueueProcessor<T>
     {
         private readonly DelegateQueueAsyncProcessor<List<T>> _delegateQueueAsyncProcessor;
-        private readonly System.Timers.Timer _timer;
+        private readonly System.Timers.Timer _addPackageTimer;
         private readonly ConcurrentQueue<T> _elementQueue = new ConcurrentQueue<T>();
 
         private readonly IProcHolder<T> _procHolder;
         private readonly IClickHouseRepository _repository;
         private readonly ILogger<ClickHouseAggregatingQueueProcessor<T>> _logger;
 
-        private readonly object _lock = new object();
+        private readonly object _smallPackagesPreventionLock = new object();
         
         private volatile int _totalProcessedEventsCount;
         private volatile int _totalPushedEventsCount;
@@ -86,11 +86,11 @@ namespace Qoollo.ClickHouse.Net.AggregatingQueueProcessor
                 name: "AggregatingQueueProcessor",
                 processing: ThreadProc);
 
-            _timer = new System.Timers.Timer(TimerPeriodMs);
+            _addPackageTimer = new System.Timers.Timer(TimerPeriodMs);
 
-            _timer.Elapsed += OnTimedEvent;
-            _timer.AutoReset = true;
-            _timer.Enabled = false;
+            _addPackageTimer.Elapsed += OnTimedEvent;
+            _addPackageTimer.AutoReset = true;
+            _addPackageTimer.Enabled = false;
 
             State = State.Created;
         }
@@ -110,7 +110,7 @@ namespace Qoollo.ClickHouse.Net.AggregatingQueueProcessor
 
             if (_elementQueue.Count >= MaxPackageSize)
             {
-                lock (_lock)
+                lock (_smallPackagesPreventionLock)
                 {
                     if (_elementQueue.Count >= MaxPackageSize)
                         AddSinglePackage();
@@ -162,7 +162,7 @@ namespace Qoollo.ClickHouse.Net.AggregatingQueueProcessor
             _totalProcessedEventsCount = 0;
             _totalPushedEventsCount = 0;
             _delegateQueueAsyncProcessor.Start();
-            _timer.Enabled = true;
+            _addPackageTimer.Enabled = true;
             State = State.Started;
         }
 
@@ -176,12 +176,11 @@ namespace Qoollo.ClickHouse.Net.AggregatingQueueProcessor
                 throw new InvalidOperationException("AggregatingQueueProcessor is not strated");
 
             State = State.Stopping;
-            _timer.Enabled = false;
-            lock (_lock)
-            {
-                while (_elementQueue.Count > 0)
-                    AddSinglePackage();
-            }
+            _addPackageTimer.Enabled = false;
+            
+            while (_elementQueue.Count > 0)
+                AddSinglePackage();
+
             _delegateQueueAsyncProcessor.Stop(waitForStop: true, letFinishProcess: true, completeAdding: true);
             State = State.Stoped;
         }
@@ -234,7 +233,7 @@ namespace Qoollo.ClickHouse.Net.AggregatingQueueProcessor
                 if (State == State.Started)
                     Stop();
 
-                _timer?.Dispose();
+                _addPackageTimer?.Dispose();
                 _delegateQueueAsyncProcessor?.Dispose();
             }
 

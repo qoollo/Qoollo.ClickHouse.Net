@@ -17,7 +17,7 @@ namespace Qoollo.ClickHouse.Net.ConnectionPool
         private readonly ILogger<ClickHouseConnectionPool> _logger;
         private readonly string[] _connectionStrings;
         private volatile string _currentConnectionString;
-        private readonly object _locker;
+        private readonly object _fullCheckLock;
 
         /// <summary>
         /// 
@@ -35,7 +35,7 @@ namespace Qoollo.ClickHouse.Net.ConnectionPool
             _connectionStrings = config.ConnectionStrings.ToArray();
             _currentConnectionString = _connectionStrings[0];
             _logger = logger;
-            _locker = new object();
+            _fullCheckLock = new object();
         }
 
         /// <summary>
@@ -134,7 +134,7 @@ namespace Qoollo.ClickHouse.Net.ConnectionPool
         /// <exception cref="ClickHouseConnectionException"></exception>
         private ClickHouseConnection OpenNewConnection()
         {
-            lock (_locker)
+            lock (_fullCheckLock)
             {
                 var connectionString = _currentConnectionString;
 
