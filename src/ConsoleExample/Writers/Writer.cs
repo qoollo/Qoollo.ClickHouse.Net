@@ -28,12 +28,12 @@ namespace ConsoleExample.Writers
             return _clickHouseRepository.BulkInsertAsync(_tableName, _columnNames, entities);
         }
 
-        public void CreateTableIfNotExists()
+        public void CreateEntityTableIfNotExists()
         {
             _clickHouseRepository.ExecuteNonQuery(_createTableQuery);
         }
 
-        public Task CreateTableIfNotExistsAsync()
+        public Task CreateEntityTableIfNotExistsAsync()
         {
             return _clickHouseRepository.ExecuteNonQueryAsync(_createTableQuery);
         }

@@ -5,8 +5,8 @@ namespace ConsoleExample.Writers
 {
     public interface IWriter
     {
-        void CreateTableIfNotExists();
-        Task CreateTableIfNotExistsAsync();
+        void CreateEntityTableIfNotExists();
+        Task CreateEntityTableIfNotExistsAsync();
         void WriteEntities(IEnumerable<Entity> entities);
         Task WriteEntitiesAsync(IEnumerable<Entity> entities);
     }

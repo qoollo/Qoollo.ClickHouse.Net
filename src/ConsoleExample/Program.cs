@@ -45,7 +45,7 @@ namespace ConsoleExample
                 new Entity(3, DateTime.Now, 1, 34.1, 57.55),
             };
 
-            writer.CreateTableIfNotExists();
+            writer.CreateEntityTableIfNotExists();
             //sync bulk insert
             writer.WriteEntities(entities);
 
