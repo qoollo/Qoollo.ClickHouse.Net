@@ -5,12 +5,17 @@
     </assembly>
     <members>
         <member name="T:Qoollo.ClickHouse.Net.AggregatingQueueProcessor.ClickHouseAggregatingQueueProcessor`1">
-            <summary>
-            Aggregating queue with a set of worker threads. 
-            Items are aggregated to packages and pushed to the processing queue. Worker-threads process packages using given Action.
-            A package is sent to the processing queue either when a sufficient number of elements are dialed, or by timer.
-            </summary>
-            <typeparam name="T">Type of items for aggregation</typeparam>
+             <summary>
+             Aggregating queue with a set of worker threads. 
+            
+             Contain two queues:
+             <para> 1) processing queue - contain packages for processing by a set of worker-threads. </para>
+             <para> 2) preparation queue - to create the next packages for processing queue. </para> 
+             Added items are pushed to the preparation queue.By timer event (or using ForcePushAllPreparedPackages). 
+             Items from preparation queue are aggregated to packages and pushed to the processing queue.
+             Worker-threads process packages from processing queue using given Action.
+             </summary>
+             <typeparam name="T">Type of items for aggregation</typeparam>
         </member>
         <member name="P:Qoollo.ClickHouse.Net.AggregatingQueueProcessor.ClickHouseAggregatingQueueProcessor`1.MaxPackageSize">
             <summary>
@@ -37,14 +42,14 @@
             Total count of items, that was processed
             </summary>
         </member>
-        <member name="P:Qoollo.ClickHouse.Net.AggregatingQueueProcessor.ClickHouseAggregatingQueueProcessor`1.TotalPushedItemsCount">
+        <member name="P:Qoollo.ClickHouse.Net.AggregatingQueueProcessor.ClickHouseAggregatingQueueProcessor`1.TotalProcessingQueuePushCount">
             <summary>
             Total count of items, that was added to the processing queue
             </summary>
         </member>
         <member name="P:Qoollo.ClickHouse.Net.AggregatingQueueProcessor.ClickHouseAggregatingQueueProcessor`1.TotalAddedItemsCount">
             <summary>
-            Total count of items, that was added by Add or AddPackage methods
+            Total count of items, that was added by any Add or Push method
             </summary>
         </member>
         <member name="M:Qoollo.ClickHouse.Net.AggregatingQueueProcessor.ClickHouseAggregatingQueueProcessor`1.#ctor(Qoollo.ClickHouse.Net.AggregatingQueueProcessor.Configuration.IClickHouseAggregatingQueueProcessorConfiguration,Qoollo.ClickHouse.Net.Repository.IClickHouseRepository,Qoollo.ClickHouse.Net.AggregatingQueueProcessor.IProcHolder{`0},Microsoft.Extensions.Logging.ILogger{Qoollo.ClickHouse.Net.AggregatingQueueProcessor.ClickHouseAggregatingQueueProcessor{`0}})">
@@ -58,22 +63,30 @@
         </member>
         <member name="M:Qoollo.ClickHouse.Net.AggregatingQueueProcessor.ClickHouseAggregatingQueueProcessor`1.Add(`0)">
             <summary>
-            Add an item to the next package that is being prepared to be added to the processing queue
+            Add an item to the preparation queue. that is being prepared to be added to the processing queue
             </summary>
             <param name="item"></param>
             <exception cref="T:System.InvalidOperationException"> Instance state is not correct for this action </exception>
         </member>
-        <member name="M:Qoollo.ClickHouse.Net.AggregatingQueueProcessor.ClickHouseAggregatingQueueProcessor`1.AddPackage(System.Collections.Generic.List{`0})">
+        <member name="M:Qoollo.ClickHouse.Net.AggregatingQueueProcessor.ClickHouseAggregatingQueueProcessor`1.AddCollection(System.Collections.Generic.ICollection{`0})">
             <summary>
-            Add the package to the processing queue
+            Add collection of items to the preparation queue
+            </summary>
+            <param name="collection"></param>
+            <exception cref="T:System.InvalidOperationException"> Instance state is not correct for this action </exception>
+        </member>
+        <member name="M:Qoollo.ClickHouse.Net.AggregatingQueueProcessor.ClickHouseAggregatingQueueProcessor`1.PushPackage(System.Collections.Generic.List{`0})">
+            <summary>
+            Push the package to the processing queue. WARNING - this method push package direct to the processing queue. 
+            So all items from preparation queue(after timer event) will be after that package in the processing queue, not before!
             </summary>
             <param name="package"></param>
             <exception cref="T:System.InvalidOperationException"> Instance state is not correct for this action </exception>
             <exception cref="T:System.ArgumentOutOfRangeException"> Package size is too big </exception>
         </member>
-        <member name="M:Qoollo.ClickHouse.Net.AggregatingQueueProcessor.ClickHouseAggregatingQueueProcessor`1.PushPackageToQueue">
+        <member name="M:Qoollo.ClickHouse.Net.AggregatingQueueProcessor.ClickHouseAggregatingQueueProcessor`1.ForcePushAllPreparedPackages">
             <summary>
-            Force complete current package and add it to the processing queue
+            Creates packages using all items from preparation queue and pushes them to the processing queue.
             </summary>
             <exception cref="T:System.InvalidOperationException"> Instance state is not correct for this action </exception>
         </member>
@@ -151,30 +164,44 @@
             </summary>
         </member>
         <member name="T:Qoollo.ClickHouse.Net.AggregatingQueueProcessor.IClickHouseAggregatingQueueProcessor`1">
-            <summary>
-            Aggregating queue with a set of worker threads. 
-            Items are aggregated to packages and pushed to the processing queue.Worker-threads process packages.
-            </summary>
-            <typeparam name="T">Type of items for aggregation</typeparam>
+             <summary>
+             Aggregating queue with a set of worker threads. 
+            
+             Contain two queues:
+             <para> 1) processing queue - contain packages for processing by a set of worker-threads. </para>
+             <para> 2) preparation queue - to create the next packages for processing queue. </para> 
+             Added items are pushed to the preparation queue.By timer event (or using ForcePushAllPreparedPackages). 
+             Items from preparation queue are aggregated to packages and pushed to the processing queue.
+             Worker-threads process packages from processing queue using given Action.
+             </summary>
+             <typeparam name="T">Type of items for aggregation</typeparam>
         </member>
         <member name="M:Qoollo.ClickHouse.Net.AggregatingQueueProcessor.IClickHouseAggregatingQueueProcessor`1.Add(`0)">
             <summary>
-            Add an item to the next package that is being prepared to be added to the processing queue
+            Add an item to the preparation queue. that is being prepared to be added to the processing queue
             </summary>
             <param name="item"></param>
             <exception cref="T:System.InvalidOperationException"> Instance state is not correct for this action </exception>
         </member>
-        <member name="M:Qoollo.ClickHouse.Net.AggregatingQueueProcessor.IClickHouseAggregatingQueueProcessor`1.AddPackage(System.Collections.Generic.List{`0})">
+        <member name="M:Qoollo.ClickHouse.Net.AggregatingQueueProcessor.IClickHouseAggregatingQueueProcessor`1.AddCollection(System.Collections.Generic.ICollection{`0})">
             <summary>
-            Add the package to the processing queue
+            Add collection of items to the preparation queue
+            </summary>
+            <param name="collection"></param>
+            <exception cref="T:System.InvalidOperationException"> Instance state is not correct for this action </exception>
+        </member>
+        <member name="M:Qoollo.ClickHouse.Net.AggregatingQueueProcessor.IClickHouseAggregatingQueueProcessor`1.PushPackage(System.Collections.Generic.List{`0})">
+            <summary>
+            Push the package to the processing queue. WARNING - this method push package direct to the processing queue. 
+            So all items from preparation queue(after timer event) will be after that package in the processing queue, not before!
             </summary>
             <param name="package"></param>
             <exception cref="T:System.InvalidOperationException"> Instance state is not correct for this action </exception>
-            <exception cref="T:System.ArgumentOutOfRangeException"></exception>
+            <exception cref="T:System.ArgumentOutOfRangeException"> Package size is too big </exception>
         </member>
-        <member name="M:Qoollo.ClickHouse.Net.AggregatingQueueProcessor.IClickHouseAggregatingQueueProcessor`1.PushPackageToQueue">
+        <member name="M:Qoollo.ClickHouse.Net.AggregatingQueueProcessor.IClickHouseAggregatingQueueProcessor`1.ForcePushAllPreparedPackages">
             <summary>
-            Force complete current package and add it to the processing queue
+            Creates packages using all items from preparation queue and pushes them to the processing queue.
             </summary>
             <exception cref="T:System.InvalidOperationException"> Instance state is not correct for this action </exception>
         </member>
@@ -210,14 +237,14 @@
             Total count of items, that was processed
             </summary>
         </member>
-        <member name="P:Qoollo.ClickHouse.Net.AggregatingQueueProcessor.IClickHouseAggregatingQueueProcessor`1.TotalPushedItemsCount">
+        <member name="P:Qoollo.ClickHouse.Net.AggregatingQueueProcessor.IClickHouseAggregatingQueueProcessor`1.TotalProcessingQueuePushCount">
             <summary>
             Total count of items, that was added to the processing queue
             </summary>
         </member>
         <member name="P:Qoollo.ClickHouse.Net.AggregatingQueueProcessor.IClickHouseAggregatingQueueProcessor`1.TotalAddedItemsCount">
             <summary>
-            Total count of items, that was added by Add or AddPackage methods
+            Total count of items, that was added by any Add or Push method
             </summary>
         </member>
         <member name="P:Qoollo.ClickHouse.Net.AggregatingQueueProcessor.IClickHouseAggregatingQueueProcessor`1.TimerPeriodMs">
