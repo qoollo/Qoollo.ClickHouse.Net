@@ -107,24 +107,25 @@ namespace Qoollo.ClickHouse.Net.ConnectionPool
 
         private bool TryOpenSingleConnection(string connectionString, bool throwErrorsFlag, out ClickHouseConnection connection)
         {
-            var con = new ClickHouseConnection(connectionString);
+            var newConnection = new ClickHouseConnection(connectionString);
+            var result = true;
             try
             {
-                con.Open();
-                connection = con;
-                return true;
+                newConnection.Open();
+                connection = newConnection;
             }
             catch (Exception ex)
             {
                 _logger.LogWarning(ex, "Connection pool: {0} can't establish connection. Connection string: {1}", Name, connectionString);
-                con.Dispose();
+                newConnection.Dispose();
 
                 if (throwErrorsFlag)
                     throw new ClickHouseConnectionException("Error on connection to ClickHouse instance", ex);
 
                 connection = null;
-                return false;
+                result = false;
             }
+            return result;
         }
 
         /// <summary>

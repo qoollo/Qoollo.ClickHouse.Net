@@ -12,8 +12,13 @@ namespace Qoollo.ClickHouse.Net.AggregatingQueueProcessor
 {
     /// <summary>
     /// Aggregating queue with a set of worker threads. 
-    /// Items are aggregated to packages and pushed to the processing queue. Worker-threads process packages using given Action.
-    /// A package is sent to the processing queue either when a sufficient number of elements are dialed, or by timer.
+    ///
+    /// Contain two queues:
+    /// <para> 1) processing queue - contain packages for processing by a set of worker-threads. </para>
+    /// <para> 2) preparation queue - to create the next packages for processing queue. </para> 
+    /// Added items are pushed to the preparation queue.By timer event (or using ForcePushAllPreparedPackages). 
+    /// Items from preparation queue are aggregated to packages and pushed to the processing queue.
+    /// Worker-threads process packages from processing queue using given Action.
     /// </summary>
     /// <typeparam name="T">Type of items for aggregation</typeparam>
     public class ClickHouseAggregatingQueueProcessor<T> : IClickHouseAggregatingQueueProcessor<T>
@@ -25,12 +30,10 @@ namespace Qoollo.ClickHouse.Net.AggregatingQueueProcessor
         private readonly IProcHolder<T> _procHolder;
         private readonly IClickHouseRepository _repository;
         private readonly ILogger<ClickHouseAggregatingQueueProcessor<T>> _logger;
-
-        private readonly object _smallPackagesPreventionLock = new object();
         
         private volatile int _totalProcessedEventsCount;
-        private volatile int _totalPushedEventsCount;
-        private volatile int _totalAddedEventsCount;
+        private volatile int _totalProcessingQueuePushCount;
+        private volatile int _totalAddedItemsCount;
 
         /// <summary>
         /// Max size of the package that can be added to the queue 
@@ -55,11 +58,11 @@ namespace Qoollo.ClickHouse.Net.AggregatingQueueProcessor
         /// <summary>
         /// Total count of items, that was added to the processing queue
         /// </summary>
-        public int TotalPushedItemsCount => _totalPushedEventsCount;
+        public int TotalProcessingQueuePushCount => _totalProcessingQueuePushCount;
         /// <summary>
-        /// Total count of items, that was added by Add or AddPackage methods
+        /// Total count of items, that was added by any Add or Push method
         /// </summary>
-        public int TotalAddedItemsCount => _totalAddedEventsCount;
+        public int TotalAddedItemsCount => _totalAddedItemsCount;
 
         /// <summary>
         /// 
@@ -96,7 +99,7 @@ namespace Qoollo.ClickHouse.Net.AggregatingQueueProcessor
         }
 
         /// <summary>
-        /// Add an item to the next package that is being prepared to be added to the processing queue
+        /// Add an item to the preparation queue. that is being prepared to be added to the processing queue
         /// </summary>
         /// <param name="item"></param>
         /// <exception cref="InvalidOperationException"> Instance state is not correct for this action </exception>
@@ -106,25 +109,32 @@ namespace Qoollo.ClickHouse.Net.AggregatingQueueProcessor
                 throw new InvalidOperationException("AggregatingQueueProcessor is not statred");
 
             _elementQueue.Enqueue(item);
-            Interlocked.Add(ref _totalAddedEventsCount, 1);
-
-            if (_elementQueue.Count >= MaxPackageSize)
-            {
-                lock (_smallPackagesPreventionLock)
-                {
-                    if (_elementQueue.Count >= MaxPackageSize)
-                        AddSinglePackage();
-                }
-            }
+            Interlocked.Add(ref _totalAddedItemsCount, 1);
         }
 
         /// <summary>
-        /// Add the package to the processing queue
+        /// Add collection of items to the preparation queue
+        /// </summary>
+        /// <param name="collection"></param>
+        /// <exception cref="InvalidOperationException"> Instance state is not correct for this action </exception>
+        public void AddCollection(ICollection<T> collection)
+        {
+            if (State != State.Started)
+                throw new InvalidOperationException("AggregatingQueueProcessor is not statred");
+
+            foreach (var item in collection)
+                _elementQueue.Enqueue(item);
+            Interlocked.Add(ref _totalAddedItemsCount, collection.Count);
+        }
+
+        /// <summary>
+        /// Push the package to the processing queue. WARNING - this method push package direct to the processing queue. 
+        /// So all items from preparation queue(after timer event) will be after that package in the processing queue, not before!
         /// </summary>
         /// <param name="package"></param>
         /// <exception cref="InvalidOperationException"> Instance state is not correct for this action </exception>
         /// <exception cref="ArgumentOutOfRangeException"> Package size is too big </exception>
-        public void AddPackage(List<T> package)
+        public void PushPackage(List<T> package)
         {
             if (State != State.Started)
                 throw new InvalidOperationException("AggregatingQueueProcessor is not statred");
@@ -134,20 +144,20 @@ namespace Qoollo.ClickHouse.Net.AggregatingQueueProcessor
 
             _delegateQueueAsyncProcessor.Add(package);
             _logger.LogInformation("Package with {0} elements was added to processong queue", package.Count);
-            Interlocked.Add(ref _totalAddedEventsCount, package.Count);
-            Interlocked.Add(ref _totalPushedEventsCount, package.Count);
+            Interlocked.Add(ref _totalAddedItemsCount, package.Count);
+            Interlocked.Add(ref _totalProcessingQueuePushCount, package.Count);
         }
 
         /// <summary>
-        /// Force complete current package and add it to the processing queue
+        /// Creates packages using all items from preparation queue and pushes them to the processing queue.
         /// </summary>
         /// <exception cref="InvalidOperationException"> Instance state is not correct for this action </exception>
-        public void PushPackageToQueue()
+        public void ForcePushAllPreparedPackages()
         {
             if (State != State.Started)
                 throw new InvalidOperationException("AggregatingQueueProcessor is not statred");
-            
-            AddSinglePackage();
+
+            PushAllPreparedPackages();
         }
 
         /// <summary>
@@ -160,7 +170,7 @@ namespace Qoollo.ClickHouse.Net.AggregatingQueueProcessor
                 throw new InvalidOperationException("AggregatingQueueProcessor is already strated");
 
             _totalProcessedEventsCount = 0;
-            _totalPushedEventsCount = 0;
+            _totalProcessingQueuePushCount = 0;
             _delegateQueueAsyncProcessor.Start();
             _addPackageTimer.Enabled = true;
             State = State.Started;
@@ -185,6 +195,13 @@ namespace Qoollo.ClickHouse.Net.AggregatingQueueProcessor
             State = State.Stoped;
         }
 
+        private void PushAllPreparedPackages()
+        {
+            var packagesCount = Math.Ceiling(_elementQueue.Count / (float) MaxPackageSize);
+            for (int i = 0; i < packagesCount; i++)
+                AddSinglePackage();
+        }
+
         private void AddSinglePackage()
         {
             var package = new List<T>(MaxPackageSize);
@@ -193,7 +210,7 @@ namespace Qoollo.ClickHouse.Net.AggregatingQueueProcessor
 
             _delegateQueueAsyncProcessor.Add(package);
             _logger.LogInformation("Package with {0} elements was added to processong queue", package.Count);
-            Interlocked.Add(ref _totalPushedEventsCount, package.Count);
+            Interlocked.Add(ref _totalProcessingQueuePushCount, package.Count);
         }
 
         private void ThreadProc(List<T> package, CancellationToken token)
@@ -215,7 +232,7 @@ namespace Qoollo.ClickHouse.Net.AggregatingQueueProcessor
 
         private void OnTimedEvent(object source, ElapsedEventArgs e)
         {
-            AddSinglePackage();
+            PushAllPreparedPackages();
         }
 
         #region IDisposable Support
