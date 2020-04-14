@@ -1,0 +1,9 @@
+{
+  "ClickHouseConnectionPoolConfiguration": {
+    "ConnectionStrings": [
+      "Host=Host;Port=Port;Database=default;User=default;Password="
+    ],
+    "ConnectionPoolMaxCount": 4,
+    "ConnectionPoolName": "ClickHouseConnectionPool"
+  }
+}

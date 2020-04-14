@@ -1,0 +1,736 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>Qoollo.ClickHouse.Net</name>
+    </assembly>
+    <members>
+        <member name="T:Qoollo.ClickHouse.Net.AggregatingQueueProcessor.ClickHouseAggregatingQueueProcessor`1">
+             <summary>
+             Aggregating queue with a set of worker threads. 
+            
+             Contain two queues:
+             <para> 1) processing queue - contain packages for processing by a set of worker-threads. </para>
+             <para> 2) preparation queue - to create the next packages for processing queue. </para> 
+             Added items are pushed to the preparation queue.By timer event (or using ForcePushAllPreparedPackages). 
+             Items from preparation queue are aggregated to packages and pushed to the processing queue.
+             Worker-threads process packages from processing queue using given Action.
+             </summary>
+             <typeparam name="T">Type of items for aggregation</typeparam>
+        </member>
+        <member name="P:Qoollo.ClickHouse.Net.AggregatingQueueProcessor.ClickHouseAggregatingQueueProcessor`1.MaxPackageSize">
+            <summary>
+            Max size of the package that can be added to the queue 
+            </summary>
+        </member>
+        <member name="P:Qoollo.ClickHouse.Net.AggregatingQueueProcessor.ClickHouseAggregatingQueueProcessor`1.TimerPeriodMs">
+            <summary>
+            Time in ms for package sending timer
+            </summary>
+        </member>
+        <member name="P:Qoollo.ClickHouse.Net.AggregatingQueueProcessor.ClickHouseAggregatingQueueProcessor`1.State">
+            <summary>
+            Current state
+            </summary>
+        </member>
+        <member name="P:Qoollo.ClickHouse.Net.AggregatingQueueProcessor.ClickHouseAggregatingQueueProcessor`1.CurrentQueueSize">
+            <summary>
+            Count of packages in the processing queue
+            </summary>
+        </member>
+        <member name="P:Qoollo.ClickHouse.Net.AggregatingQueueProcessor.ClickHouseAggregatingQueueProcessor`1.TotalProcessedItemsCount">
+            <summary>
+            Total count of items, that was processed
+            </summary>
+        </member>
+        <member name="P:Qoollo.ClickHouse.Net.AggregatingQueueProcessor.ClickHouseAggregatingQueueProcessor`1.TotalProcessingQueuePushCount">
+            <summary>
+            Total count of items, that was added to the processing queue
+            </summary>
+        </member>
+        <member name="P:Qoollo.ClickHouse.Net.AggregatingQueueProcessor.ClickHouseAggregatingQueueProcessor`1.TotalAddedItemsCount">
+            <summary>
+            Total count of items, that was added by any Add or Push method
+            </summary>
+        </member>
+        <member name="M:Qoollo.ClickHouse.Net.AggregatingQueueProcessor.ClickHouseAggregatingQueueProcessor`1.#ctor(Qoollo.ClickHouse.Net.AggregatingQueueProcessor.Configuration.IClickHouseAggregatingQueueProcessorConfiguration,Qoollo.ClickHouse.Net.Repository.IClickHouseRepository,Qoollo.ClickHouse.Net.AggregatingQueueProcessor.IProcHolder{`0},Microsoft.Extensions.Logging.ILogger{Qoollo.ClickHouse.Net.AggregatingQueueProcessor.ClickHouseAggregatingQueueProcessor{`0}})">
+            <summary>
+            
+            </summary>
+            <param name="config"> Configuration for instance </param>
+            <param name="repository"> IClickHouseRepository instance </param>
+            <param name="procHolder"> Holder for action that the worker-threads will perform with packages from the processing queue </param>
+            <param name="logger">Logger</param>
+        </member>
+        <member name="M:Qoollo.ClickHouse.Net.AggregatingQueueProcessor.ClickHouseAggregatingQueueProcessor`1.Add(`0)">
+            <summary>
+            Add an item to the preparation queue. that is being prepared to be added to the processing queue
+            </summary>
+            <param name="item"></param>
+            <exception cref="T:System.InvalidOperationException"> Instance state is not correct for this action </exception>
+        </member>
+        <member name="M:Qoollo.ClickHouse.Net.AggregatingQueueProcessor.ClickHouseAggregatingQueueProcessor`1.AddCollection(System.Collections.Generic.ICollection{`0})">
+            <summary>
+            Add collection of items to the preparation queue
+            </summary>
+            <param name="collection"></param>
+            <exception cref="T:System.InvalidOperationException"> Instance state is not correct for this action </exception>
+        </member>
+        <member name="M:Qoollo.ClickHouse.Net.AggregatingQueueProcessor.ClickHouseAggregatingQueueProcessor`1.PushPackage(System.Collections.Generic.List{`0})">
+            <summary>
+            Push the package to the processing queue. WARNING - this method push package direct to the processing queue. 
+            So all items from preparation queue(after timer event) will be after that package in the processing queue, not before!
+            </summary>
+            <param name="package"></param>
+            <exception cref="T:System.InvalidOperationException"> Instance state is not correct for this action </exception>
+            <exception cref="T:System.ArgumentOutOfRangeException"> Package size is too big </exception>
+        </member>
+        <member name="M:Qoollo.ClickHouse.Net.AggregatingQueueProcessor.ClickHouseAggregatingQueueProcessor`1.ForcePushAllPreparedPackages">
+            <summary>
+            Creates packages using all items from preparation queue and pushes them to the processing queue.
+            </summary>
+            <exception cref="T:System.InvalidOperationException"> Instance state is not correct for this action </exception>
+        </member>
+        <member name="M:Qoollo.ClickHouse.Net.AggregatingQueueProcessor.ClickHouseAggregatingQueueProcessor`1.Start">
+            <summary>
+            Start processing
+            </summary>
+            <exception cref="T:System.InvalidOperationException"> Instance state is not correct for this action  </exception>
+        </member>
+        <member name="M:Qoollo.ClickHouse.Net.AggregatingQueueProcessor.ClickHouseAggregatingQueueProcessor`1.Stop">
+            <summary>
+            Stop processing 
+            </summary>
+            <exception cref="T:System.InvalidOperationException"> Instance state is not correct for this action  </exception>
+        </member>
+        <member name="M:Qoollo.ClickHouse.Net.AggregatingQueueProcessor.ClickHouseAggregatingQueueProcessor`1.Dispose(System.Boolean)">
+            <summary>
+            Dispose pattern
+            </summary>
+            <param name="disposing"></param>
+        </member>
+        <member name="M:Qoollo.ClickHouse.Net.AggregatingQueueProcessor.ClickHouseAggregatingQueueProcessor`1.Dispose">
+            <summary>
+            Dispose processor
+            </summary>
+        </member>
+        <member name="T:Qoollo.ClickHouse.Net.AggregatingQueueProcessor.Configuration.ClickHouseAggregatingQueueProcessorConfiguration">
+            <summary>
+            Configuration for ClickHouseAggregatingQueueProcessor
+            </summary>
+        </member>
+        <member name="P:Qoollo.ClickHouse.Net.AggregatingQueueProcessor.Configuration.ClickHouseAggregatingQueueProcessorConfiguration.MaxPackageSize">
+            <summary>
+            Max size of the package that can be added to the queue 
+            </summary>
+        </member>
+        <member name="P:Qoollo.ClickHouse.Net.AggregatingQueueProcessor.Configuration.ClickHouseAggregatingQueueProcessorConfiguration.ProcessingThreadsCount">
+            <summary>
+            Count of worker-threads
+            </summary>
+        </member>
+        <member name="P:Qoollo.ClickHouse.Net.AggregatingQueueProcessor.Configuration.ClickHouseAggregatingQueueProcessorConfiguration.QueueMaxSize">
+            <summary>
+            Max size of processing-queue
+            </summary>
+        </member>
+        <member name="P:Qoollo.ClickHouse.Net.AggregatingQueueProcessor.Configuration.ClickHouseAggregatingQueueProcessorConfiguration.TimerPeriodMs">
+            <summary>
+            Time in ms for package sending timer
+            </summary>
+        </member>
+        <member name="T:Qoollo.ClickHouse.Net.AggregatingQueueProcessor.Configuration.IClickHouseAggregatingQueueProcessorConfiguration">
+            <summary>
+            Configuration for ClickHouseAggregatingQueueProcessor
+            </summary>
+        </member>
+        <member name="P:Qoollo.ClickHouse.Net.AggregatingQueueProcessor.Configuration.IClickHouseAggregatingQueueProcessorConfiguration.MaxPackageSize">
+            <summary>
+            Max size of the package that can be added to the queue 
+            </summary>
+        </member>
+        <member name="P:Qoollo.ClickHouse.Net.AggregatingQueueProcessor.Configuration.IClickHouseAggregatingQueueProcessorConfiguration.ProcessingThreadsCount">
+            <summary>
+            Count of worker-threads
+            </summary>
+        </member>
+        <member name="P:Qoollo.ClickHouse.Net.AggregatingQueueProcessor.Configuration.IClickHouseAggregatingQueueProcessorConfiguration.QueueMaxSize">
+            <summary>
+            Max size of processing-queue
+            </summary>
+        </member>
+        <member name="P:Qoollo.ClickHouse.Net.AggregatingQueueProcessor.Configuration.IClickHouseAggregatingQueueProcessorConfiguration.TimerPeriodMs">
+            <summary>
+            Time in ms for package sending timer
+            </summary>
+        </member>
+        <member name="T:Qoollo.ClickHouse.Net.AggregatingQueueProcessor.IClickHouseAggregatingQueueProcessor`1">
+             <summary>
+             Aggregating queue with a set of worker threads. 
+            
+             Contain two queues:
+             <para> 1) processing queue - contain packages for processing by a set of worker-threads. </para>
+             <para> 2) preparation queue - to create the next packages for processing queue. </para> 
+             Added items are pushed to the preparation queue.By timer event (or using ForcePushAllPreparedPackages). 
+             Items from preparation queue are aggregated to packages and pushed to the processing queue.
+             Worker-threads process packages from processing queue using given Action.
+             </summary>
+             <typeparam name="T">Type of items for aggregation</typeparam>
+        </member>
+        <member name="M:Qoollo.ClickHouse.Net.AggregatingQueueProcessor.IClickHouseAggregatingQueueProcessor`1.Add(`0)">
+            <summary>
+            Add an item to the preparation queue. that is being prepared to be added to the processing queue
+            </summary>
+            <param name="item"></param>
+            <exception cref="T:System.InvalidOperationException"> Instance state is not correct for this action </exception>
+        </member>
+        <member name="M:Qoollo.ClickHouse.Net.AggregatingQueueProcessor.IClickHouseAggregatingQueueProcessor`1.AddCollection(System.Collections.Generic.ICollection{`0})">
+            <summary>
+            Add collection of items to the preparation queue
+            </summary>
+            <param name="collection"></param>
+            <exception cref="T:System.InvalidOperationException"> Instance state is not correct for this action </exception>
+        </member>
+        <member name="M:Qoollo.ClickHouse.Net.AggregatingQueueProcessor.IClickHouseAggregatingQueueProcessor`1.PushPackage(System.Collections.Generic.List{`0})">
+            <summary>
+            Push the package to the processing queue. WARNING - this method push package direct to the processing queue. 
+            So all items from preparation queue(after timer event) will be after that package in the processing queue, not before!
+            </summary>
+            <param name="package"></param>
+            <exception cref="T:System.InvalidOperationException"> Instance state is not correct for this action </exception>
+            <exception cref="T:System.ArgumentOutOfRangeException"> Package size is too big </exception>
+        </member>
+        <member name="M:Qoollo.ClickHouse.Net.AggregatingQueueProcessor.IClickHouseAggregatingQueueProcessor`1.ForcePushAllPreparedPackages">
+            <summary>
+            Creates packages using all items from preparation queue and pushes them to the processing queue.
+            </summary>
+            <exception cref="T:System.InvalidOperationException"> Instance state is not correct for this action </exception>
+        </member>
+        <member name="M:Qoollo.ClickHouse.Net.AggregatingQueueProcessor.IClickHouseAggregatingQueueProcessor`1.Start">
+            <summary>
+            Start processing
+            </summary>
+            <exception cref="T:System.InvalidOperationException"> Instance state is not correct for this action </exception>
+        </member>
+        <member name="M:Qoollo.ClickHouse.Net.AggregatingQueueProcessor.IClickHouseAggregatingQueueProcessor`1.Stop">
+            <summary>
+            Stop processing 
+            </summary>
+            <exception cref="T:System.InvalidOperationException"> Instance state is not correct for this action  </exception>
+        </member>
+        <member name="P:Qoollo.ClickHouse.Net.AggregatingQueueProcessor.IClickHouseAggregatingQueueProcessor`1.State">
+            <summary>
+            Current state
+            </summary>
+        </member>
+        <member name="P:Qoollo.ClickHouse.Net.AggregatingQueueProcessor.IClickHouseAggregatingQueueProcessor`1.CurrentQueueSize">
+            <summary>
+            Count of packages in the processing queue
+            </summary>
+        </member>
+        <member name="P:Qoollo.ClickHouse.Net.AggregatingQueueProcessor.IClickHouseAggregatingQueueProcessor`1.MaxPackageSize">
+            <summary>
+            Max size of the package that can be added to the queue 
+            </summary>
+        </member>
+        <member name="P:Qoollo.ClickHouse.Net.AggregatingQueueProcessor.IClickHouseAggregatingQueueProcessor`1.TotalProcessedItemsCount">
+            <summary>
+            Total count of items, that was processed
+            </summary>
+        </member>
+        <member name="P:Qoollo.ClickHouse.Net.AggregatingQueueProcessor.IClickHouseAggregatingQueueProcessor`1.TotalProcessingQueuePushCount">
+            <summary>
+            Total count of items, that was added to the processing queue
+            </summary>
+        </member>
+        <member name="P:Qoollo.ClickHouse.Net.AggregatingQueueProcessor.IClickHouseAggregatingQueueProcessor`1.TotalAddedItemsCount">
+            <summary>
+            Total count of items, that was added by any Add or Push method
+            </summary>
+        </member>
+        <member name="P:Qoollo.ClickHouse.Net.AggregatingQueueProcessor.IClickHouseAggregatingQueueProcessor`1.TimerPeriodMs">
+            <summary>
+            Time in ms for package sending timer
+            </summary>
+        </member>
+        <member name="F:Qoollo.ClickHouse.Net.AggregatingQueueProcessor.State.Created">
+            <summary>
+            The instance is created, but not started
+            </summary>
+        </member>
+        <member name="F:Qoollo.ClickHouse.Net.AggregatingQueueProcessor.State.Started">
+            <summary>
+            The instance is working and ready to ready to receive items
+            </summary>
+        </member>
+        <member name="F:Qoollo.ClickHouse.Net.AggregatingQueueProcessor.State.Stopping">
+            <summary>
+            The instance is stopping, adding items is unavailable
+            </summary>
+        </member>
+        <member name="F:Qoollo.ClickHouse.Net.AggregatingQueueProcessor.State.Stoped">
+            <summary>
+            The instance is stopped
+            </summary>
+        </member>
+        <member name="F:Qoollo.ClickHouse.Net.AggregatingQueueProcessor.State.Disposed">
+            <summary>
+            The instance is disposed 
+            </summary>
+        </member>
+        <member name="T:Qoollo.ClickHouse.Net.ConnectionPool.ClickHouseConnectionException">
+            <summary>
+            ClickHouse Connection Error Exception
+            </summary>
+        </member>
+        <member name="M:Qoollo.ClickHouse.Net.ConnectionPool.ClickHouseConnectionException.#ctor">
+            <summary>
+            ClickHouse Connection Error Exception
+            </summary>
+        </member>
+        <member name="M:Qoollo.ClickHouse.Net.ConnectionPool.ClickHouseConnectionException.#ctor(System.String)">
+            <summary>
+            ClickHouse Connection Error Exception
+            </summary>
+            <param name="message"></param>
+        </member>
+        <member name="M:Qoollo.ClickHouse.Net.ConnectionPool.ClickHouseConnectionException.#ctor(System.String,System.Exception)">
+            <summary>
+            ClickHouse Connection Error Exception
+            </summary>
+            <param name="message"></param>
+            <param name="innerException"></param>
+        </member>
+        <member name="M:Qoollo.ClickHouse.Net.ConnectionPool.ClickHouseConnectionException.#ctor(System.Runtime.Serialization.SerializationInfo,System.Runtime.Serialization.StreamingContext)">
+            <summary>
+            ClickHouse Connection Error Exception
+            </summary>
+            <param name="info"></param>
+            <param name="context"></param>
+        </member>
+        <member name="T:Qoollo.ClickHouse.Net.ConnectionPool.ClickHouseConnectionPool">
+            <summary>
+            A connection pool that can work with a list of ClickHouse connection strings. 
+            In case of a connection error, go to the next one from the list. 
+            If all connection strings are invalid, an exception is thrown.
+            </summary>
+            <exception cref="T:Qoollo.ClickHouse.Net.ConnectionPool.ClickHouseConnectionException"></exception>
+        </member>
+        <member name="M:Qoollo.ClickHouse.Net.ConnectionPool.ClickHouseConnectionPool.#ctor(Qoollo.ClickHouse.Net.ConnectionPool.Configuration.IClickHouseConnectionPoolConfiguration,Microsoft.Extensions.Logging.ILogger{Qoollo.ClickHouse.Net.ConnectionPool.ClickHouseConnectionPool})">
+            <summary>
+            
+            </summary>
+            <param name="config">Configuration</param>
+            <param name="logger">logger instance</param>
+        </member>
+        <member name="M:Qoollo.ClickHouse.Net.ConnectionPool.ClickHouseConnectionPool.CreateElement(ClickHouse.Ado.ClickHouseConnection@,System.Int32,System.Threading.CancellationToken)">
+            <summary>
+            Try to create ClickHouseConnection fast, if fail - try full check, if fail - throw an exception
+            </summary>
+            <param name="elem"></param>
+            <param name="timeout"></param>
+            <param name="token"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Qoollo.ClickHouse.Net.ConnectionPool.ClickHouseConnectionPool.DestroyElement(ClickHouse.Ado.ClickHouseConnection)">
+            <summary>
+            Destroy connection
+            </summary>
+            <param name="elem"></param>
+        </member>
+        <member name="M:Qoollo.ClickHouse.Net.ConnectionPool.ClickHouseConnectionPool.IsValidElement(ClickHouse.Ado.ClickHouseConnection)">
+            <summary>
+            Check is connection valid
+            </summary>
+            <param name="elem">Connection</param>
+            <returns></returns>
+        </member>
+        <member name="M:Qoollo.ClickHouse.Net.ConnectionPool.ClickHouseConnectionPool.OpenNewConnection">
+            <summary>
+            Pass through all connection strings in search of working. If not found, the last one will throw an exception
+            </summary>
+            <returns>New opened connection</returns>
+            <exception cref="T:Qoollo.ClickHouse.Net.ConnectionPool.ClickHouseConnectionException"></exception>
+        </member>
+        <member name="T:Qoollo.ClickHouse.Net.ConnectionPool.Configuration.ClickHouseConnectionPoolConfiguration">
+            <summary>
+            Configuration for ClickHouseConnectionPool
+            </summary>
+        </member>
+        <member name="P:Qoollo.ClickHouse.Net.ConnectionPool.Configuration.ClickHouseConnectionPoolConfiguration.ConnectionStrings">
+            <summary>
+            List of connection strings.
+            </summary>
+        </member>
+        <member name="P:Qoollo.ClickHouse.Net.ConnectionPool.Configuration.ClickHouseConnectionPoolConfiguration.ConnectionPoolMaxCount">
+            <summary>
+            Maximum elements count for connection pool.
+            </summary>
+        </member>
+        <member name="P:Qoollo.ClickHouse.Net.ConnectionPool.Configuration.ClickHouseConnectionPoolConfiguration.ConnectionPoolName">
+            <summary>
+            Name for connection pool
+            </summary>
+        </member>
+        <member name="T:Qoollo.ClickHouse.Net.ConnectionPool.Configuration.IClickHouseConnectionPoolConfiguration">
+            <summary>
+            Configuration for ClickHouseConnectionPool
+            </summary>
+        </member>
+        <member name="P:Qoollo.ClickHouse.Net.ConnectionPool.Configuration.IClickHouseConnectionPoolConfiguration.ConnectionStrings">
+            <summary>
+            List of connection strings.
+            </summary>
+        </member>
+        <member name="P:Qoollo.ClickHouse.Net.ConnectionPool.Configuration.IClickHouseConnectionPoolConfiguration.ConnectionPoolMaxCount">
+            <summary>
+            Maximum elements count for connection pool.
+            </summary>
+        </member>
+        <member name="P:Qoollo.ClickHouse.Net.ConnectionPool.Configuration.IClickHouseConnectionPoolConfiguration.ConnectionPoolName">
+            <summary>
+            Name for connection pool
+            </summary>
+        </member>
+        <member name="T:Qoollo.ClickHouse.Net.HostExtension">
+            <summary>
+            Extension to start ClickHouseAggregatingQueueProcessor
+            </summary>
+        </member>
+        <member name="M:Qoollo.ClickHouse.Net.HostExtension.StartClickHouseAggregatingQueueProcessor``1(Microsoft.Extensions.Hosting.IHost)">
+            <summary>
+            Start ClickHouseAggregatingQueueProcessor added in ConfigureServices.
+            </summary>
+            <typeparam name="T">ClickHouseAggregatingQueueProcessor entity type</typeparam>
+            <param name="host"></param>
+        </member>
+        <member name="T:Qoollo.ClickHouse.Net.Repository.ClickHouseRepository">
+            <summary>
+            A repository that implements convenient wrappers for common use cases of ClickHouse. 
+            Also provides the ability to execute an arbitrary query.
+            </summary>
+        </member>
+        <member name="M:Qoollo.ClickHouse.Net.Repository.ClickHouseRepository.#ctor(Qoollo.ClickHouse.Net.ConnectionPool.ClickHouseConnectionPool)">
+            <summary>
+            
+            </summary>
+            <param name="clickHouseConnectionPool">connection pool</param>
+        </member>
+        <member name="M:Qoollo.ClickHouse.Net.Repository.ClickHouseRepository.BulkInsert``1(System.String,System.Collections.Generic.IEnumerable{System.String},System.Collections.Generic.IEnumerable{``0})">
+            <summary>
+            Bulk insert, generates query from table name and row names.
+            </summary>
+            <typeparam name="T">Entity type, should implement IEnumerable.</typeparam>
+            <param name="tableName">The name of the table into which data will be inserted.</param>
+            <param name="columns">A list of column names into which data will be inserted. Order is important!</param>
+            <param name="bulk">Collection for insert.</param>
+        </member>
+        <member name="M:Qoollo.ClickHouse.Net.Repository.ClickHouseRepository.BulkInsertAsync``1(System.String,System.Collections.Generic.IEnumerable{System.String},System.Collections.Generic.IEnumerable{``0})">
+            <summary>
+            Asynchronous bulk insert, generates query from table name and row names.
+            </summary>
+            <typeparam name="T">Entity type, should implement IEnumerable.</typeparam>
+            <param name="tableName">The name of the table into which data will be inserted</param>
+            <param name="columns">A list of column names into which data will be inserted. Order is important!</param>
+            <param name="bulk">Collection for insert</param>
+        </member>
+        <member name="M:Qoollo.ClickHouse.Net.Repository.ClickHouseRepository.BulkInsert(System.String,System.Collections.Generic.IEnumerable{System.String},ClickHouse.Ado.IBulkInsertEnumerable)">
+            <summary>
+            Bulk insert, generates query from table name and row names. 
+            Uses IBulkInsertEnumerable to speed up processing and use less memory inside ClickHouse driver. 
+            </summary>
+            <param name="tableName">The name of the table into which data will be inserted.</param>
+            <param name="columns">A list of column names into which data will be inserted. Order is important!</param>
+            <param name="bulk">Collection for insert.</param>
+        </member>
+        <member name="M:Qoollo.ClickHouse.Net.Repository.ClickHouseRepository.BulkInsertAsync(System.String,System.Collections.Generic.IEnumerable{System.String},ClickHouse.Ado.IBulkInsertEnumerable)">
+            <summary>
+            Asynchronous bulk insert, generates query from table name and row names. 
+            Uses IBulkInsertEnumerable to speed up processing and use less memory inside ClickHouse driver. 
+            </summary>
+            <param name="tableName">The name of the table into which data will be inserted.</param>
+            <param name="columns">A list of column names into which data will be inserted. Order is important!</param>
+            <param name="bulk">Collection for insert.</param>
+        </member>
+        <member name="M:Qoollo.ClickHouse.Net.Repository.ClickHouseRepository.BulkInsert``1(System.String,System.Collections.Generic.IEnumerable{``0})">
+            <summary>
+            Bulk insert, allows customizing query. Warning - the wrong query can be a reason for the exceptions.
+            </summary>
+            <typeparam name="T">Entity type, should implement IEnumerable.</typeparam>
+            <param name="queryText">Text of insert query. The query should contain @bulk parameter.</param>
+            <param name="bulk">Collection for insert.</param>
+        </member>
+        <member name="M:Qoollo.ClickHouse.Net.Repository.ClickHouseRepository.BulkInsertAsync``1(System.String,System.Collections.Generic.IEnumerable{``0})">
+            <summary>
+            Asynchronous bulk insert, allows customizing query. Warning - the wrong query can be a reason for the exceptions.
+            </summary>
+            <typeparam name="T">Entity type, should implement IEnumerable.</typeparam>
+            <param name="queryText">Text of insert query. The query should contain @bulk parameter.</param>
+            <param name="bulk">Collection for insert.</param>
+        </member>
+        <member name="M:Qoollo.ClickHouse.Net.Repository.ClickHouseRepository.BulkInsert(System.String,ClickHouse.Ado.IBulkInsertEnumerable)">
+            <summary>
+            Asynchronous bulk insert, allows customizing query. Warning - the wrong query can be a reason for the exceptions.
+            Uses IBulkInsertEnumerable to speed up processing and use less memory inside ClickHouse driver. 
+            </summary>
+            <param name="queryText">Text of insert query. The query should contain @bulk parameter.</param>
+            <param name="bulk">Collection for insert.</param>
+        </member>
+        <member name="M:Qoollo.ClickHouse.Net.Repository.ClickHouseRepository.BulkInsertAsync(System.String,ClickHouse.Ado.IBulkInsertEnumerable)">
+            <summary>
+            Bulk insert, allows customizing query. Warning - the wrong query can be a reason for the exceptions.
+            Uses IBulkInsertEnumerable to speed up processing and use less memory inside ClickHouse driver. 
+            </summary>
+            <param name="queryText">Text of insert query. The query should contain @bulk parameter</param>
+            <param name="bulk">Collection for insert.</param>
+        </member>
+        <member name="M:Qoollo.ClickHouse.Net.Repository.ClickHouseRepository.ExecuteNonQuery(System.String,System.Collections.Generic.IEnumerable{ClickHouse.Ado.ClickHouseParameter})">
+            <summary>
+            Method for executing query without result.
+            </summary>
+            <param name="queryText">Text for select query. The query should contain all parameters from parameters list.</param>
+            <param name="parameters">Collection of parameters for query.</param>
+        </member>
+        <member name="M:Qoollo.ClickHouse.Net.Repository.ClickHouseRepository.ExecuteNonQueryAsync(System.String,System.Collections.Generic.IEnumerable{ClickHouse.Ado.ClickHouseParameter})">
+            <summary>
+            Asynchronous method for executing query without result.
+            </summary>
+            <param name="queryText">Text for select query. The query should contain all parameters from parameters list.</param>
+            <param name="parameters">Collection of parameters for query.</param>
+        </member>
+        <member name="M:Qoollo.ClickHouse.Net.Repository.ClickHouseRepository.ExecuteQueryMapping``1(System.String,Qoollo.ClickHouse.Net.Repository.IEntityMapper{``0},System.Collections.Generic.IEnumerable{ClickHouse.Ado.ClickHouseParameter})">
+            <summary>
+            Method for executing a select query that maps the received data to a specific type of entity.
+            </summary>
+            <typeparam name="T">The type of entity on which the data will be mapped.</typeparam>
+            <param name="queryText">Text for select query. The query should contain all parameters from parameters list.</param>
+            <param name="mapper">Mapper implementation for type T.</param>
+            <param name="parameters">Collection of parameters for query.</param>
+            <returns>Collection of entities</returns>
+        </member>
+        <member name="M:Qoollo.ClickHouse.Net.Repository.ClickHouseRepository.ExecuteQueryMappingAsync``1(System.String,Qoollo.ClickHouse.Net.Repository.IEntityMapper{``0},System.Collections.Generic.IEnumerable{ClickHouse.Ado.ClickHouseParameter})">
+            <summary>
+            Asynchronous method for executing a select query that maps the received data to a specific type of entity.
+            </summary>
+            <typeparam name="T">The type of entity on which the data will be mapped.</typeparam>
+            <param name="queryText">Text for select query. The query should contain all parameters from parameters list.</param>
+            <param name="mapper">Mapper implementation for type T.</param>
+            <param name="parameters">Collection of parameters for query.</param>
+            <returns>Collection of entities</returns>
+        </member>
+        <member name="M:Qoollo.ClickHouse.Net.Repository.ClickHouseRepository.ExecuteReader``1(System.String,System.Func{System.Data.IDataReader,``0},System.Collections.Generic.IEnumerable{ClickHouse.Ado.ClickHouseParameter})">
+            <summary>
+            Method for executing a custom query processor
+            </summary>
+            <typeparam name="T">Result type for processor.</typeparam>
+            <param name="queryText">Text for select query. The query should contain all parameters from parameters list.</param>
+            <param name="processor">Custom query processor.</param>
+            <param name="parameters">Collection of parameters for query.</param>
+            <returns>Result of processor</returns>
+        </member>
+        <member name="M:Qoollo.ClickHouse.Net.Repository.ClickHouseRepository.ExecuteReaderAsync``1(System.String,System.Func{System.Data.IDataReader,``0},System.Collections.Generic.IEnumerable{ClickHouse.Ado.ClickHouseParameter})">
+            <summary>
+            Asynchronous method for executing a custom query processor.
+            </summary>
+            <typeparam name="T">Result type for processor.</typeparam>
+            <param name="queryText">Text for select query. The query should contain all parameters from parameters list.</param>
+            <param name="processor">Custom query processor.</param>
+            <param name="parameters">Collection of parameters for query.</param>
+            <returns>Result of processor</returns>
+        </member>
+        <member name="M:Qoollo.ClickHouse.Net.Repository.ClickHouseRepository.ExecuteScalar(System.String,System.Collections.Generic.IEnumerable{ClickHouse.Ado.ClickHouseParameter})">
+            <summary>
+            Method for executing query and read first result.
+            </summary>
+            <param name="queryText">Text for select query. The query should contain all parameters from parameters list.</param>
+            <param name="parameters">Collection of parameters for query.</param>
+            <returns>first result without any mapping</returns>
+        </member>
+        <member name="M:Qoollo.ClickHouse.Net.Repository.ClickHouseRepository.ExecuteScalarAsync(System.String,System.Collections.Generic.IEnumerable{ClickHouse.Ado.ClickHouseParameter})">
+            <summary>
+            Asynchronous method for executing query and read first result.
+            </summary>
+            <param name="queryText">Text for select query. The query should contain all parameters from parameters list.</param>
+            <param name="parameters">Collection of parameters for query.</param>
+            <returns>first result without any mapping</returns>
+        </member>
+        <member name="T:Qoollo.ClickHouse.Net.Repository.IClickHouseRepository">
+            <summary>
+            A repository that implements convenient wrappers for common use cases of ClickHouse. 
+            Also provides the ability to execute an arbitrary query.
+            </summary>
+        </member>
+        <member name="M:Qoollo.ClickHouse.Net.Repository.IClickHouseRepository.BulkInsert``1(System.String,System.Collections.Generic.IEnumerable{``0})">
+            <summary>
+            Bulk insert, allows customizing query. Warning - the wrong query can be a reason for the exceptions.
+            </summary>
+            <typeparam name="T">Entity type, should implement IEnumerable.</typeparam>
+            <param name="queryText">Text of insert query. The query should contain @bulk parameter.</param>
+            <param name="bulk">Collection for insert.</param>
+        </member>
+        <member name="M:Qoollo.ClickHouse.Net.Repository.IClickHouseRepository.BulkInsertAsync``1(System.String,System.Collections.Generic.IEnumerable{``0})">
+            <summary>
+            Asynchronous bulk insert, allows customizing query. Warning - the wrong query can be a reason for the exceptions.
+            </summary>
+            <typeparam name="T">Entity type, should implement IEnumerable.</typeparam>
+            <param name="queryText">Text of insert query. The query should contain @bulk parameter.</param>
+            <param name="bulk">Collection for insert.</param>
+        </member>
+        <member name="M:Qoollo.ClickHouse.Net.Repository.IClickHouseRepository.BulkInsert``1(System.String,System.Collections.Generic.IEnumerable{System.String},System.Collections.Generic.IEnumerable{``0})">
+            <summary>
+            Bulk insert, generates query from table name and row names.
+            </summary>
+            <typeparam name="T">Entity type, should implement IEnumerable.</typeparam>
+            <param name="tableName">The name of the table into which data will be inserted.</param>
+            <param name="columns">A list of column names into which data will be inserted. Order is important!</param>
+            <param name="bulk">Collection for insert.</param>
+        </member>
+        <member name="M:Qoollo.ClickHouse.Net.Repository.IClickHouseRepository.BulkInsertAsync``1(System.String,System.Collections.Generic.IEnumerable{System.String},System.Collections.Generic.IEnumerable{``0})">
+            <summary>
+            Asynchronous bulk insert, generates query from table name and row names.
+            </summary>
+            <typeparam name="T">Entity type, should implement IEnumerable.</typeparam>
+            <param name="tableName">The name of the table into which data will be inserted</param>
+            <param name="columns">A list of column names into which data will be inserted. Order is important!</param>
+            <param name="bulk">Collection for insert</param>
+        </member>
+        <member name="M:Qoollo.ClickHouse.Net.Repository.IClickHouseRepository.BulkInsert(System.String,ClickHouse.Ado.IBulkInsertEnumerable)">
+            <summary>
+            Bulk insert, allows customizing query. Warning - the wrong query can be a reason for the exceptions.
+            Uses IBulkInsertEnumerable to speed up processing and use less memory inside ClickHouse driver. 
+            </summary>
+            <param name="queryText">Text of insert query. The query should contain @bulk parameter</param>
+            <param name="bulk">Collection for insert.</param>
+        </member>
+        <member name="M:Qoollo.ClickHouse.Net.Repository.IClickHouseRepository.BulkInsertAsync(System.String,ClickHouse.Ado.IBulkInsertEnumerable)">
+            <summary>
+            Asynchronous bulk insert, allows customizing query. Warning - the wrong query can be a reason for the exceptions.
+            Uses IBulkInsertEnumerable to speed up processing and use less memory inside ClickHouse driver. 
+            </summary>
+            <param name="queryText">Text of insert query. The query should contain @bulk parameter.</param>
+            <param name="bulk">Collection for insert.</param>
+        </member>
+        <member name="M:Qoollo.ClickHouse.Net.Repository.IClickHouseRepository.BulkInsert(System.String,System.Collections.Generic.IEnumerable{System.String},ClickHouse.Ado.IBulkInsertEnumerable)">
+            <summary>
+            Bulk insert, generates query from table name and row names. 
+            Uses IBulkInsertEnumerable to speed up processing and use less memory inside ClickHouse driver. 
+            </summary>
+            <param name="tableName">The name of the table into which data will be inserted.</param>
+            <param name="columns">A list of column names into which data will be inserted. Order is important!</param>
+            <param name="bulk">Collection for insert.</param>
+        </member>
+        <member name="M:Qoollo.ClickHouse.Net.Repository.IClickHouseRepository.BulkInsertAsync(System.String,System.Collections.Generic.IEnumerable{System.String},ClickHouse.Ado.IBulkInsertEnumerable)">
+            <summary>
+            Asynchronous bulk insert, generates query from table name and row names. 
+            Uses IBulkInsertEnumerable to speed up processing and use less memory inside ClickHouse driver. 
+            </summary>
+            <param name="tableName">The name of the table into which data will be inserted.</param>
+            <param name="columns">A list of column names into which data will be inserted. Order is important!</param>
+            <param name="bulk">Collection for insert.</param>
+        </member>
+        <member name="M:Qoollo.ClickHouse.Net.Repository.IClickHouseRepository.ExecuteNonQuery(System.String,System.Collections.Generic.IEnumerable{ClickHouse.Ado.ClickHouseParameter})">
+            <summary>
+            Method for executing query without result.
+            </summary>
+            <param name="queryText">Text for select query. The query should contain all parameters from parameters list.</param>
+            <param name="parameters">Collection of parameters for query.</param>
+        </member>
+        <member name="M:Qoollo.ClickHouse.Net.Repository.IClickHouseRepository.ExecuteNonQueryAsync(System.String,System.Collections.Generic.IEnumerable{ClickHouse.Ado.ClickHouseParameter})">
+            <summary>
+            Asynchronous method for executing query without result.
+            </summary>
+            <param name="queryText">Text for select query. The query should contain all parameters from parameters list.</param>
+            <param name="parameters">Collection of parameters for query.</param>
+        </member>
+        <member name="M:Qoollo.ClickHouse.Net.Repository.IClickHouseRepository.ExecuteScalar(System.String,System.Collections.Generic.IEnumerable{ClickHouse.Ado.ClickHouseParameter})">
+            <summary>
+            Method for executing query and read first result.
+            </summary>
+            <param name="queryText">Text for select query. The query should contain all parameters from parameters list.</param>
+            <param name="parameters">Collection of parameters for query.</param>
+            <returns>first result without any mapping</returns>
+        </member>
+        <member name="M:Qoollo.ClickHouse.Net.Repository.IClickHouseRepository.ExecuteScalarAsync(System.String,System.Collections.Generic.IEnumerable{ClickHouse.Ado.ClickHouseParameter})">
+            <summary>
+            Asynchronous method for executing query and read first result.
+            </summary>
+            <param name="queryText">Text for select query. The query should contain all parameters from parameters list.</param>
+            <param name="parameters">Collection of parameters for query.</param>
+            <returns>first result without any mapping</returns>
+        </member>
+        <member name="M:Qoollo.ClickHouse.Net.Repository.IClickHouseRepository.ExecuteReader``1(System.String,System.Func{System.Data.IDataReader,``0},System.Collections.Generic.IEnumerable{ClickHouse.Ado.ClickHouseParameter})">
+            <summary>
+            Method for executing a custom query processor
+            </summary>
+            <typeparam name="T">Result type for processor.</typeparam>
+            <param name="queryText">Text for select query. The query should contain all parameters from parameters list.</param>
+            <param name="processor">Custom query processor.</param>
+            <param name="parameters">Collection of parameters for query.</param>
+            <returns>Result of processor</returns>
+        </member>
+        <member name="M:Qoollo.ClickHouse.Net.Repository.IClickHouseRepository.ExecuteReaderAsync``1(System.String,System.Func{System.Data.IDataReader,``0},System.Collections.Generic.IEnumerable{ClickHouse.Ado.ClickHouseParameter})">
+            <summary>
+            Asynchronous method for executing a custom query processor.
+            </summary>
+            <typeparam name="T">Result type for processor.</typeparam>
+            <param name="queryText">Text for select query. The query should contain all parameters from parameters list.</param>
+            <param name="processor">Custom query processor.</param>
+            <param name="parameters">Collection of parameters for query.</param>
+            <returns>Result of processor</returns>
+        </member>
+        <member name="M:Qoollo.ClickHouse.Net.Repository.IClickHouseRepository.ExecuteQueryMapping``1(System.String,Qoollo.ClickHouse.Net.Repository.IEntityMapper{``0},System.Collections.Generic.IEnumerable{ClickHouse.Ado.ClickHouseParameter})">
+            <summary>
+            Method for executing a select query that maps the received data to a specific type of entity.
+            </summary>
+            <typeparam name="T">The type of entity on which the data will be mapped.</typeparam>
+            <param name="queryText">Text for select query. The query should contain all parameters from parameters list.</param>
+            <param name="mapper">Mapper implementation for type T.</param>
+            <param name="parameters">Collection of parameters for query.</param>
+            <returns>Collection of entities</returns>
+        </member>
+        <member name="M:Qoollo.ClickHouse.Net.Repository.IClickHouseRepository.ExecuteQueryMappingAsync``1(System.String,Qoollo.ClickHouse.Net.Repository.IEntityMapper{``0},System.Collections.Generic.IEnumerable{ClickHouse.Ado.ClickHouseParameter})">
+            <summary>
+            Asynchronous method for executing a select query that maps the received data to a specific type of entity.
+            </summary>
+            <typeparam name="T">The type of entity on which the data will be mapped.</typeparam>
+            <param name="queryText">Text for select query. The query should contain all parameters from parameters list.</param>
+            <param name="mapper">Mapper implementation for type T.</param>
+            <param name="parameters">Collection of parameters for query.</param>
+            <returns>Collection of entities</returns>
+        </member>
+        <member name="T:Qoollo.ClickHouse.Net.Repository.IEntityMapper`1">
+            <summary>
+            Interface for mapper class. 
+            </summary>
+            <typeparam name="T">Type of entity</typeparam>
+        </member>
+        <member name="M:Qoollo.ClickHouse.Net.Repository.IEntityMapper`1.MapEntity(System.Data.IDataReader)">
+            <summary>
+            Implements reading entity from reader logic.
+            </summary>
+            <param name="reader">reader</param>
+            <returns>Entity</returns>
+        </member>
+        <member name="T:Qoollo.ClickHouse.Net.ServiceCollectionExtensions">
+            <summary>
+            Extensions to add Qoollo.ClickHouse.Net classes to DI.
+            </summary>
+        </member>
+        <member name="M:Qoollo.ClickHouse.Net.ServiceCollectionExtensions.AddClickHouseRepository(Microsoft.Extensions.DependencyInjection.IServiceCollection,Microsoft.Extensions.Configuration.IConfigurationSection)">
+            <summary>
+            Extension to add ClickHouseConnectionPool and IClickHouseRepository to services.
+            </summary>
+            <param name="services"></param>
+            <param name="configuration">Configuration section that contain connection pool configuration (ClickHouseConnectionPoolConfiguration)</param>
+        </member>
+        <member name="M:Qoollo.ClickHouse.Net.ServiceCollectionExtensions.AddClickHouseAggregatingQueueProcessor``1(Microsoft.Extensions.DependencyInjection.IServiceCollection,Microsoft.Extensions.Configuration.IConfigurationSection,System.Action{Qoollo.ClickHouse.Net.Repository.IClickHouseRepository,System.Collections.Generic.List{``0},Microsoft.Extensions.Logging.ILogger})">
+            <summary>
+            Extension to add IClickHouseAggregatingQueueProcessor to services. Requires IClickHouseRepository in DI.
+            </summary>
+            <typeparam name="T"></typeparam>
+            <param name="services"></param>
+            <param name="configuration">Configuration section that contain queue processor configuration (ClickHouseAggregatingQueueProcessorConfiguration)</param>
+            <param name="proc"></param>
+            <returns></returns>
+        </member>
+    </members>
+</doc>
