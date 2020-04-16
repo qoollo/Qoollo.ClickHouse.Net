@@ -12,9 +12,31 @@ Qoollo.ClickHouse.Net is a library of useful classes for working with ClickHouse
 
 In this library, [ClickHouse-Net](https://github.com/killwort/ClickHouse-Net) is used as a driver, that implements the native protocol, which positively affects performance.
 
-## Wiki
-See the [wiki](https://github.com/qoollo/Qoollo.ClickHouse.Net/wiki) for more information about using the library and code samples.  
+## Installation
+Qoollo.ClickHouse.Net can be installed via the nuget UI (as Qoollo.ClickHouse.Net preview version), or via the nuget package manager console:
+```
+PM> Install-Package Qoollo.Redis.Net -Version 1.0.1-preview
+```
+After that you need to specify configuration section in appsettings.json
 
+``` C#
+"ClickHouse": {
+    "ConnectionStrings": [
+        "Host=Host;Port=Port;Database=default;User=default;Password="
+    ],
+    "ConnectionPoolMaxCount": 4,
+    "ConnectionPoolName": "ClickHouseConnectionPool"
+    },
+```
+
+Finally you can simply registry ClickHouseRepository in ConfigureServices
+
+```
+services.AddClickHouseRepository(Configuration.GetSection("ClickHouse"));
+```
+
+## Wiki
+Installation for `ClickHouseAggregatingQueueProcessor`, more information about using the library and code samples you can see in the [wiki](https://github.com/qoollo/Qoollo.ClickHouse.Net/wiki).
 ***
 
 ## Qoollo.ClickHouse.Net по русски
